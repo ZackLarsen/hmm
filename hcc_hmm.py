@@ -28,8 +28,6 @@ class ForwardBackward:
         self.end_state = 'Ending'
 
 
-class ForwardBackward:
-    # __init__
     def forward():
         forward = []
         f_previous = {}
@@ -55,9 +53,6 @@ class ForwardBackward:
         {'probability': p_fwd, 'sequence': forward}
 
 
-class ForwardBackward:
-    # __init__
-    # forward
     def backward():
         backward = []
         b_prev = {}
@@ -84,10 +79,6 @@ class ForwardBackward:
         {'probability': p_bkw, 'sequence': backward}
 
 
-class ForwardBackward:
-    # __init__
-    # forward
-    # backward
     def forward_backward():
         size = len(self.observations)
         forward = forward()
@@ -101,5 +92,3 @@ class ForwardBackward:
                 backward['sequence'][i][s] / forward['probability'])
             posterior[s].append()
         return [forward, backward, posterior]
-
-
