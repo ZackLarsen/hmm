@@ -22,7 +22,8 @@ def unigram(tag_list):
 
     model = counts_dd.copy()
     for word in counts_dd:
-        model[word] = model[word]/float(len(counts_dd))
+        #model[word] = model[word]/float(len(counts_dd))
+        model[word] = model[word]/float(sum(tag_counts.values()))
 
     return counts_dd, model
 
@@ -68,6 +69,13 @@ data
 sentences
 
 
+len(tokenlist) # 518
+len(POSlist) # 484
+## Difference in length here is due to START and STOP tokens
+## not having a corresponding POS tag
+
+
+
 
 
 
@@ -78,6 +86,14 @@ sentences
 tag_counts, tag_model = unigram(POSlist)
 tag_counts
 tag_model
+
+len(tag_counts)
+sum(tag_counts.values())
+
+
+
+
+
 
 ## Second, create bigrams of tags and then count them:
 bigrams = find_ngrams(POSlist, 2)
@@ -93,9 +109,9 @@ for bigram in bigrams:
 bigram_dd
 
 
-bigram_sample = ('VBZ', 'VBN')
-type(bigram_sample)
-bigram_sample[0]
+#bigram_sample = ('VBZ', 'VBN')
+#type(bigram_sample)
+#bigram_sample[0]
 
 
 
@@ -111,6 +127,7 @@ bigram_sample[0]
 ## Do this by dividing the bigram count by the unigram count:
 ## C(ti−1,ti) / C(ti−1)
 
+tag_counts['NN']
 
 
 
