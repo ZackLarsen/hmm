@@ -9,7 +9,7 @@
   * pi: an **initial probability distribution** over states. pi i is the probability that the markov chain will start in state i. Some states j may have pi j = 0, meaning they cannot be initial states. As with the transition probabilities, all must sum to one to form a valid probability distribution.
 
 #### A  first-order  hidden  Markov  model  instantiates  two  simplifying  assumptions:
-   * First, as with a first-order Markov chain, the probability of a particular state dependsonly on the previous state: **Markov Assumption**: P(qi|q1...qi−1) = P(qi|qi−1).
+   * First, as with a first-order Markov chain, the probability of a particular state depends only on the previous state: **Markov Assumption**: P(qi|q1...qi−1) = P(qi|qi−1).
    * Second, the probability of an output observation oi depends only on the state that produced the observation qi and not on any other states or any other observations: **Output Independence**: P(oi|q1...qi,...,qT,o1,...,oi,...,oT) = P(oi|qi).
 
 #### An HMM has two probability matrices, A and B:
