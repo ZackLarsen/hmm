@@ -71,6 +71,7 @@ sentences
 
 
 
+
 ## Create transition probability matrix A:
 
 ## First, calculate number of times each tag occurs:
