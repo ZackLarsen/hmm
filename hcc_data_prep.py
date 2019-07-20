@@ -20,12 +20,10 @@ with open('WSJ_head.txt') as infile:
         line=line.strip('\n')
         chars = line.split(' ')
         if len(chars) == 3:
-            token = chars[0]
-            POS = chars[1]
-            PI = chars[2]
-            data[token] = POS
-            tokenlist.append(token)
-            POSlist.append(POS)
+            tokenlist.append(chars[0]) # Token
+            POSlist.append(chars[1])  # POS
+            data[chars[0]] = chars[1] # {Token : POS}
+            #PI = chars[2] # Not needed now
         else:
             sentences += 1
             tokenlist.append('<STOP>')
