@@ -3,9 +3,41 @@
 # POS tagger data
 
 from __future__ import division
-import re, pprint, sys, datetime, os, collections
+import re, pprint, sys, datetime, os
+from collections import defaultdict, Counter
 from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
 import shelve
+
+
+def unigram(tag_list):
+    '''
+    Construct unigram model with LaPlace smoothing
+    :param tag_list: A list of POS tags
+    :return: A default dictionary of POS tag counts and
+    a default dictionary of POS tag counts smoothed by LaPlace smoothing
+    '''
+    counts_dd = defaultdict(int)
+    for tag in tag_list:
+        counts_dd[tag] += 1
+
+    model = counts_dd.copy()
+    for word in counts_dd:
+        model[word] = model[word]/float(len(counts_dd))
+
+    return counts_dd, model
+
+
+def find_ngrams(input_list, n):
+    '''
+    Generate ngrams
+    :param input_list: List of tokens in a sequence
+    :param n: Number of tokens to slide over, e.g. 1 for unigram,
+    2 for bigram, 3 for trigram, etc.
+    :return: A generator object with ngrams
+    '''
+    return zip(*[input_list[i:] for i in range(n)])
+
+
 
 
 
@@ -34,6 +66,73 @@ tokenlist
 POSlist
 data
 sentences
+
+
+
+
+
+## Create transition probability matrix A:
+
+## First, calculate number of times each tag occurs:
+tag_counts, tag_model = unigram(POSlist)
+tag_counts
+tag_model
+
+## Second, create bigrams of tags and then count them:
+bigrams = find_ngrams(POSlist, 2)
+
+#for bigram in bigrams:
+#    print(list(bigram))
+
+bigram_dd = defaultdict(int)
+
+for bigram in bigrams:
+    bigram_dd[bigram] += 1
+
+bigram_dd
+
+
+bigram_sample = ('VBZ', 'VBN')
+type(bigram_sample)
+bigram_sample[0]
+
+
+
+
+
+
+
+
+
+
+## Thirdly, calculate probability of tag t given that it is
+## preceded by tag t-1 (P(t|(t,t-1))
+## Do this by dividing the bigram count by the unigram count:
+## C(ti−1,ti) / C(ti−1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -81,35 +180,13 @@ for sentence in tokens:
 
 
 
-def unigram(tokens):
-    '''
-    Construct unigram model with LaPlace smoothing
-    :param tokens:
-    :return:
-    '''
-    model = {}
-    for f in tokens:
-        try:
-            model[f] += 1
-        except KeyError:
-            model[f] = 1
-            continue
-    for word in model:
-        model[word] = model[word]/float(len(model))
-    return model
+
 unigrams = unigram(token_list)
 
 
 
 
-def find_ngrams(input_list, n):
-    '''
-    Generate ngrams
-    :param input_list:
-    :param n:
-    :return:
-    '''
-    return zip(*[input_list[i:] for i in range(n)])
+
 
 bigrams = find_ngrams(token_list,2)
 
