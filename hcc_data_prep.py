@@ -7,6 +7,7 @@ import re, pprint, sys, datetime, os
 from collections import defaultdict, Counter
 from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
 import shelve
+import numpy as np
 
 
 def unigram(tag_list):
@@ -69,6 +70,23 @@ data
 sentences
 
 
+
+
+
+
+# Create numpy ndarray and then list of UNIQUE POS tags:
+unique_POS = np.unique(POSlist)
+unique_POS = list(unique_POS)
+## Add in start and stop tags
+unique_POS.insert(0,'<START>')
+unique_POS
+unique_POS.insert(len(unique_POS),'<STOP>')
+unique_POS
+len(unique_POS) # 34
+
+
+
+
 len(tokenlist) # 518
 len(POSlist) # 484
 ## Difference in length here is due to START and STOP tokens
@@ -80,7 +98,22 @@ len(POSlist) # 484
 
 
 
-## Create transition probability matrix A:
+
+
+
+unique_POS[0]
+unique_POS[len(unique_POS) - 1]
+
+
+## Create transition probability matrix A (dimensions N*N):
+N = len(unique_POS)
+matrix_a = np.zeros((N,N))
+matrix_a
+
+
+
+
+
 
 ## First, calculate number of times each tag occurs:
 tag_counts, tag_model = unigram(POSlist)
