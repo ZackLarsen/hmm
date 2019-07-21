@@ -24,7 +24,6 @@
    * We can simplify a bit by dropping the denominator:
      * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(w_1^{n}_ | t_1^{n}_)P(t_1^n)">
 
-
 #### HMM taggers make two further simplifying assumptions:
    * The first is that the probability of a word appearing depends only on its own tag and is independent of neighboring words and tags:
      * <img src="https://render.githubusercontent.com/render/math?math=P(w_1^{n}_|t_1^{n}) \approx \Pi_{i=1}^{n} P(w_i|t_i)">
@@ -38,3 +37,5 @@
    * <img src="https://render.githubusercontent.com/render/math?math=P(t_{i} | t_{i-1})"> 
      Corresponds to our transmission probability matrix.
 
+#### The Viterbi decoding algorithm:
+   * First, set up a probability matrix (or lattice), with one column for each observation ot and one row for each state in the state graph
