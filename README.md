@@ -17,4 +17,4 @@
    * **Matrix B** (emission probabilities, P(wi|ti)), represents the probability, given a tag, that it will be associated with a given word. The MLE of the emission probability is P(wi|ti) = C(ti,wi) / C(ti).
 
 #### The  goal  of  HMM  decoding:
-   * Choose  the  state sequence s1 that is most probable given the observation sequence of n observations On1:
+   * Given an HMM lambda = (A,B), and a sequence of observations O, find the most probable sequence of states Q.
