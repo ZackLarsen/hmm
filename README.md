@@ -17,7 +17,7 @@
    * **Matrix B** (emission probabilities, P(wi|ti)), represents the probability, given a tag, that it will be associated with a given word. The MLE of the emission probability is P(wi|ti) = C(ti,wi) / C(ti).
 
 #### The  goal  of  HMM  decoding:
-   * Given an HMM lambda = (A,B), and a sequence of observations O, find the most probable sequence of states Q:
+   * Given an HMM λ = (A,B), and a sequence of observations O, find the most probable sequence of states Q:
      * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ | w_1^{n})">
    * The way we would do this in the context of an HMM is to use Bayes' rule:
      * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax \frac{P(w_1^{n}_ | t_1^{n}_) P(t_1^n)}{ P(w_1^n)}">     
@@ -38,4 +38,7 @@
      Corresponds to our transmission probability matrix.
 
 #### The Viterbi decoding algorithm:
-   * First, set up a probability matrix (or lattice), with one column for each observation ot and one row for each state in the state graph
+   * First, set up a probability matrix (or lattice), with one column for each observation ot and one row for each state in the state graph.
+   * Each cell of the trellis, vt(j), represents the probability that the HMM is in state j after seeing the first t observations and passing through the most probable state sequence q1,...,qt−1, given the HMM λ. 
+   * The value of each cell vt(j) is computed by recursively taking the most probable path that could lead us to this cell. 
+   * Formally, each cell expresses the probability vt(j) = max q1,...,qt−1 P(q1...qt−1, o1, o2...ot, qt=j|λ)
