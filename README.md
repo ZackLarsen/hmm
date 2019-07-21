@@ -20,7 +20,7 @@
    * Given an HMM lambda = (A,B), and a sequence of observations O, find the most probable sequence of states Q:
      * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ | w_1^{n})">
    * The way we would do this in the context of an HMM is to use Bayes' rule:
-     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(w_1^{n}_ | t_1^{n}_)P(t_1^n) P(w_1^n)">     
+     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax \frac{P(w_1^{n}_ | t_1^{n}_) P(t_1^n)}{ P(w_1^n)}">     
    * We can simplify a bit by dropping the denominator:
      * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(w_1^{n}_ | t_1^{n}_)P(t_1^n)">
 
