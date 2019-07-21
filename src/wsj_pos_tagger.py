@@ -174,9 +174,9 @@ token_pos_list
 unique_tokens = np.unique(token_list)
 n_unique_tokens = len(unique_tokens)
 
-unique_pos = np.unique(pos_list)
-unique_pos = list(unique_pos)
-n_unique_tags = len(unique_pos)
+unique_tags = np.unique(pos_list)
+unique_tags = list(unique_tags)
+n_unique_tags = len(unique_tags)
 
 ## Add in start tags
 #start_pos = unique_pos.copy()
@@ -212,10 +212,8 @@ n_unique_bigrams = len(bigram_counts.keys())
 
 ## Step 7
 
-## Create transition probability matrix A (dimensions (N + 1) * N):
-N1 = len(start_pos)
-N2 = len(unique_pos)
-matrix_a = np.zeros((N1,N2))
+## Create transition probability matrix A (dimensions (n_unique_pos * n_unique_pos):
+matrix_a = np.zeros((n_unique_tags, n_unique_tags))
 
 ## Calculate probability of tag t given that it is
 ## preceded by tag t-1 (P(t|(t,t-1))
@@ -223,15 +221,16 @@ matrix_a = np.zeros((N1,N2))
 ## C(ti−1,ti) / C(ti−1)
 
 ## Populating cells of matrix_a:
-for i, tag_i in enumerate(start_pos):
-    for j, tag_j in enumerate(unique_pos):
+for i, tag_i in enumerate(unique_tags):
+    for j, tag_j in enumerate(unique_tags):
         bigram = tuple((tag_i, tag_j))
         bigram_count = bigram_counts[bigram]
         unigram_count = tag_counts[tag_i]
         a = bigram_count / unigram_count
         matrix_a[i,j] = a
 ## Verify that the start tag probabilities sum to 1:
-if matrix_a[0,:].sum() != 1:
+start_index = unique_tags.index('<START>')
+if matrix_a[start_index,:].sum() != 1:
     print('ERROR: <START> tag probabilities do not form a valid probability distribution')
 
 
@@ -252,10 +251,10 @@ matrix_b = np.zeros((n_unique_tokens, n_unique_tags))
 
 ## Populate cells of matrix_b:
 for i, token in enumerate(unique_tokens):
-    for j, tag in enumerate(unique_pos):
-        token_tag_tuple = tuple((unique_tokens[i],unique_pos[j]))
-        token_tag_count = token_tag_dd[token_tag_tuple]
-        tag_count = tag_counts[unique_pos[j]]
+    for j, tag in enumerate(unique_tags):
+        token_tag_tuple = tuple((unique_tokens[i],unique_tags[j]))
+        token_tag_count = token_tag_counts[token_tag_tuple]
+        tag_count = tag_counts[unique_tags[j]]
         b = token_tag_count / tag_count
         matrix_b[i,j] = b
 
@@ -266,7 +265,9 @@ for i, token in enumerate(unique_tokens):
 ## n_unique_tags * n_unique_tokens
 matrix_v = np.zeros((n_unique_tags, n_unique_tokens))
 
-
+matrix_v.shape
+matrix_a.shape
+matrix_b.shape
 
 
 
