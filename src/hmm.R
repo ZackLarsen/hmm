@@ -27,8 +27,6 @@ wsj
 
 
 
-
-
 # Initial states
 initial_probs
 
