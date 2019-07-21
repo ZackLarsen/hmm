@@ -27,4 +27,7 @@
 
 #### HMM taggers make two further simplifying assumptions:
    * The first is that the probability of a word appearing depends only on its own tag and is independent of neighboring words and tags:
-   * The second assumption, the **bigram assumption**, is that the probability of a tag is dependent only on the previous tag, rather than the entire tag sequence.
+     * <img src="https://render.githubusercontent.com/render/math?math=P(w_1^{n}_|t_1^{n}) \approx \Pi_{i=1}^{n} P(w_i|t_i)">
+   * The second assumption, the **bigram assumption**, is that the probability of a tag is dependent only on the previous tag, rather than the entire tag sequence:
+     * <img src="https://render.githubusercontent.com/render/math?math=P(t_1^{n}) \approx \Pi_{i=1}^{n} P(t_i|t_{i-1})">
+     * P(tn1)≈n∏i=1P(ti|ti−1)
