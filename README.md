@@ -33,5 +33,6 @@
 
 #### With our two simplifying assumptions, the equation for the most probable tag sequence simplifies to:
    * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ | w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i|t_i) P(t_{i} | t_{i-1})">
-
+     * <img src="https://render.githubusercontent.com/render/math?math=P(w_i|t_i)"> Corresponds to our **emission** probability matrix.
+     * <img src="https://render.githubusercontent.com/render/math?math=P(t_{i} | t_{i-1})"> Corresponds to our **transmission** probability matrix.
 
