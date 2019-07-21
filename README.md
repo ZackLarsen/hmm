@@ -32,5 +32,6 @@
      * <img src="https://render.githubusercontent.com/render/math?math=P(t_1^{n}) \approx \Pi_{i=1}^{n} P(t_{i} | t_{i-1})">
 
 #### With our two simplifying assumptions, the equation for the most probable tag sequence simplifies to:
-   * tn1=argmaxtn1P(tn1|wn1)≈argmaxtn1n∏i=1emission︷︸︸︷P(wi|ti)transition︷︸︸︷P(ti|ti−1)
    * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ | w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i|t_i) P(t_{i} | t_{i-1})">
+
+
