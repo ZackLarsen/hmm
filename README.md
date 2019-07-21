@@ -21,4 +21,4 @@
 
 #### HMM taggers make two further simplifying assumptions:
    * The first is that the probability of a word appearing depends only on its own tag and is independent of neighboring words and tags:
-   * The second assumption, the bigram assumption, is that the probability of a tag is dependent only on the previous tag, rather than the entire tag sequence.
+   * The second assumption, the **bigram assumption**, is that the probability of a tag is dependent only on the previous tag, rather than the entire tag sequence.
