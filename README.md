@@ -16,7 +16,7 @@
 
 #### An HMM has two probability matrices, A and B:
    * **Matrix A** contains the tag transition probabilities P(ti|ti−1) which represent the probability of a tag occurring given the previous tag. We compute the maximum likelihood estimate of this transition probability by counting, out of the times we see the first tag in a labeled corpus, how often the first tag is followed by the second: 
-     * <img src="https://render.githubusercontent.com/render/math?math=P(t_i \mid t_{i-1}) = \frac{C(t_{i-1}, t_i)}{C(t_{i−1})}"> 
+     * <img src="https://render.githubusercontent.com/render/math?math=P(t_i \mid t_{i-1}) = \frac{C(t_{i-1}, t_i)}{C(t_{i-1})}"> 
      * This matrix will have dimensions (N * N), where N is the number of tags.
    * **Matrix B** (emission probabilities, P(wi|ti)), represents the probability, given a tag, that it will be associated with a given word. The MLE of the emission probability is:
      * <img src="https://render.githubusercontent.com/render/math?math=P(w_i \mid t_i) = \frac{C(t_i,w_i)}{C(t_i)}">
