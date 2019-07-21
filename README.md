@@ -10,12 +10,15 @@
 
 #### A  first-order  hidden  Markov  model  instantiates  two  simplifying  assumptions:
    * First, as with a first-order Markov chain, the probability of a particular state depends only on the previous state: **Markov Assumption**: P(qi|q1...qi−1) = P(qi|qi−1).
+     * <img src="https://render.githubusercontent.com/render/math?math=P(q_1 \mid q_i,...,q_{i-1}) = P(q_i \mid q_{i-1})">
    * Second, the probability of an output observation oi depends only on the state that produced the observation qi and not on any other states or any other observations: **Output Independence**:
      * <img src="https://render.githubusercontent.com/render/math?math=P(o_i \mid q_1...q_i,...,q_T,o_1,...,o_i,...,o_T) = P(o_i \mid q_i)">
 
 #### An HMM has two probability matrices, A and B:
-   * **Matrix A** contains the tag transition probabilities P(ti|ti−1) which represent the probability of a tag occurring given the previous tag. We compute the maximum likelihood estimate of this transition probability by counting, out of the times we see the first tag in a labeled corpus, how often the first tag is followed by the second: P(ti|ti−1) = C(ti−1,ti) / C(ti−1). This matrix will have dimensions (N * N), where N is the number of tags.
-   * **Matrix B** (emission probabilities, P(wi|ti)), represents the probability, given a tag, that it will be associated with a given word. The MLE of the emission probability is P(wi|ti) = C(ti,wi) / C(ti).
+   * **Matrix A** contains the tag transition probabilities P(ti|ti−1) which represent the probability of a tag occurring given the previous tag. We compute the maximum likelihood estimate of this transition probability by counting, out of the times we see the first tag in a labeled corpus, how often the first tag is followed by the second: 
+     * <img src="https://render.githubusercontent.com/render/math?math=P(t_i \mid t_{i−1}) = \frac{C(t_{i−1},t_i)}{C(t_{i−1})}"> This matrix will have dimensions (N * N), where N is the number of tags.
+   * **Matrix B** (emission probabilities, P(wi|ti)), represents the probability, given a tag, that it will be associated with a given word. The MLE of the emission probability is:
+     * <img src="https://render.githubusercontent.com/render/math?math=P(w_i \mid t_i) = \frac{C(t_i,w_i)}{C(t_i)}">
 
 #### The  goal  of  HMM  decoding:
    * Given an HMM λ = (A,B), and a sequence of observations O, find the most probable sequence of states Q:
