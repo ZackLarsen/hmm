@@ -18,8 +18,7 @@
 
 #### The  goal  of  HMM  decoding:
    * Given an HMM lambda = (A,B), and a sequence of observations O, find the most probable sequence of states Q:
-   tn1=argmaxtn1P(wn1|tn1)P(tn1)
-   <img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1">
+   <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}|w_1^{n})">
 
 #### HMM taggers make two further simplifying assumptions:
    * The first is that the probability of a word appearing depends only on its own tag and is independent of neighboring words and tags:
