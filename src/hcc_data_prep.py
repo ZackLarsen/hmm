@@ -29,10 +29,13 @@ Step 6: (optional)
 Step 7:
     Create matrix_a for transition probabilities from state i to
     state j
+    Populate the cells of matrix_a with the corresponding probabilities
 Step 8:
     Create matrix_b for emission probabilities
+    Populate the cells of matrix_b with the corresponding probabilities
 Step 9:
     Create matrix_v for Viterbi lattice
+    Populate the cells of matrix_v with the corresponding probabilities
 '''
 
 
