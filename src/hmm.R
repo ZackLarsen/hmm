@@ -9,4 +9,18 @@ library(pacman)
 library(tidyverse)
 library(magrittr)
 
-p_load(HMM, TraMineR)
+p_load(HMM, TraMineR, seqHMM, data.table, here)
+
+
+
+
+
+
+fread(here("data",'WSJ_head.txt'), fill = TRUE, header = FALSE)
+
+
+
+
+
+
+
