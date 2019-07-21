@@ -9,7 +9,7 @@
   * pi: an **initial probability distribution** over states. pi i is the probability that the markov chain will start in state i. Some states j may have pi j = 0, meaning they cannot be initial states. As with the transition probabilities, all must sum to one to form a valid probability distribution.
 
 #### A  first-order  hidden  Markov  model  instantiates  two  simplifying  assumptions:
-   * First, as with a first-order Markov chain, the probability of a particular state depends only on the previous state: **Markov Assumption**: P(qi|q1...qi−1) = P(qi|qi−1).
+   * First, as with a first-order Markov chain, the probability of a particular state depends only on the previous state: **Markov Assumption**:
      * <img src="https://render.githubusercontent.com/render/math?math=P(q_1 \mid q_i,...,q_{i-1}) = P(q_i \mid q_{i-1})">
    * Second, the probability of an output observation oi depends only on the state that produced the observation qi and not on any other states or any other observations: **Output Independence**:
      * <img src="https://render.githubusercontent.com/render/math?math=P(o_i \mid q_1...q_i,...,q_T,o_1,...,o_i,...,o_T) = P(o_i \mid q_i)">
@@ -35,7 +35,7 @@
      * <img src="https://render.githubusercontent.com/render/math?math=P(t_1^{n}) \approx \Pi_{i=1}^{n} P(t_{i} \mid t_{i-1})">
 
 #### With our two simplifying assumptions, the equation for the most probable tag sequence simplifies to:
-   * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ \mid w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i|t_i) P(t_{i} \mid t_{i-1})">
+   * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ \mid w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i \mid t_i) P(t_{i} \mid t_{i-1})">
    * <img src="https://render.githubusercontent.com/render/math?math=P(w_i \mid t_i)"> 
      Corresponds to our emission probability matrix.
    * <img src="https://render.githubusercontent.com/render/math?math=P(t_{i} \mid t_{i-1})"> 
