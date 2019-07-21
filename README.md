@@ -10,7 +10,8 @@
 
 #### A  first-order  hidden  Markov  model  instantiates  two  simplifying  assumptions:
    * First, as with a first-order Markov chain, the probability of a particular state depends only on the previous state: **Markov Assumption**: P(qi|q1...qi−1) = P(qi|qi−1).
-   * Second, the probability of an output observation oi depends only on the state that produced the observation qi and not on any other states or any other observations: **Output Independence**: P(oi|q1...qi,...,qT,o1,...,oi,...,oT) = P(oi|qi).
+   * Second, the probability of an output observation oi depends only on the state that produced the observation qi and not on any other states or any other observations: **Output Independence**:
+     * <img src="https://render.githubusercontent.com/render/math?math=P(o_i \mid q_1...q_i,...,q_T,o_1,...,o_i,...,o_T) = P(o_i \mid q_i)">
 
 #### An HMM has two probability matrices, A and B:
    * **Matrix A** contains the tag transition probabilities P(ti|ti−1) which represent the probability of a tag occurring given the previous tag. We compute the maximum likelihood estimate of this transition probability by counting, out of the times we see the first tag in a labeled corpus, how often the first tag is followed by the second: P(ti|ti−1) = C(ti−1,ti) / C(ti−1). This matrix will have dimensions (N * N), where N is the number of tags.
@@ -18,23 +19,23 @@
 
 #### The  goal  of  HMM  decoding:
    * Given an HMM λ = (A,B), and a sequence of observations O, find the most probable sequence of states Q:
-     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ | w_1^{n})">
+     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ \mid w_1^{n})">
    * The way we would do this in the context of an HMM is to use Bayes' rule:
-     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax \frac{P(w_1^{n}_ | t_1^{n}_) P(t_1^n)}{ P(w_1^n)}">     
+     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax \frac{P(w_1^{n}_ \mid t_1^{n}_) P(t_1^n)}{ P(w_1^n)}">     
    * We can simplify a bit by dropping the denominator:
-     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(w_1^{n}_ | t_1^{n}_)P(t_1^n)">
+     * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(w_1^{n}_ \mid t_1^{n}_)P(t_1^n)">
 
 #### HMM taggers make two further simplifying assumptions:
    * The first is that the probability of a word appearing depends only on its own tag and is independent of neighboring words and tags:
-     * <img src="https://render.githubusercontent.com/render/math?math=P(w_1^{n}_|t_1^{n}) \approx \Pi_{i=1}^{n} P(w_i|t_i)">
+     * <img src="https://render.githubusercontent.com/render/math?math=P(w_1^{n}_ \mid t_1^{n}) \approx \Pi_{i=1}^{n} P(w_i \mid t_i)">
    * The second assumption, the **bigram assumption**, is that the probability of a tag is dependent only on the previous tag, rather than the entire tag sequence:
-     * <img src="https://render.githubusercontent.com/render/math?math=P(t_1^{n}) \approx \Pi_{i=1}^{n} P(t_{i} | t_{i-1})">
+     * <img src="https://render.githubusercontent.com/render/math?math=P(t_1^{n}) \approx \Pi_{i=1}^{n} P(t_{i} \mid t_{i-1})">
 
 #### With our two simplifying assumptions, the equation for the most probable tag sequence simplifies to:
-   * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ | w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i|t_i) P(t_{i} | t_{i-1})">
-   * <img src="https://render.githubusercontent.com/render/math?math=P(w_i|t_i)"> 
+   * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ \mid w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i|t_i) P(t_{i} \mid t_{i-1})">
+   * <img src="https://render.githubusercontent.com/render/math?math=P(w_i \mid t_i)"> 
      Corresponds to our emission probability matrix.
-   * <img src="https://render.githubusercontent.com/render/math?math=P(t_{i} | t_{i-1})"> 
+   * <img src="https://render.githubusercontent.com/render/math?math=P(t_{i} \mid t_{i-1})"> 
      Corresponds to our transmission probability matrix.
 
 #### The Viterbi decoding algorithm:
