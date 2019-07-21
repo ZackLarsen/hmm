@@ -127,7 +127,7 @@ unique_pos = list(unique_pos)
 
 
 
-## Create transition probability matrix A (dimensions N*N):
+## Create transition probability matrix A (dimensions (N + 1) * N):
 
 
 ## First, calculate number of times each tag occurs:
@@ -161,7 +161,7 @@ for bigram in bigrams:
 
 # First, create empty matrix of correct dimensions N * N:
 N = len(unique_pos)
-matrix_a = np.zeros((N,N))
+matrix_a = np.zeros((N+1,N))
 
 ## Populating cells of matrix_a:
 for i, tag_i in enumerate(unique_pos):
@@ -173,11 +173,6 @@ for i, tag_i in enumerate(unique_pos):
         matrix_a[i,j] = a
 
 matrix_a
-
-matrix_a[12,35] # 0.75 - this value is very high!
-unique_pos[12] # 'EX'
-unique_pos[35] # 'VBZ'
-
 
 
 
