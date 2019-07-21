@@ -42,3 +42,4 @@
    * Each cell of the trellis, vt(j), represents the probability that the HMM is in state j after seeing the first t observations and passing through the most probable state sequence q1,...,qt−1, given the HMM λ. 
    * The value of each cell vt(j) is computed by recursively taking the most probable path that could lead us to this cell. 
    * Formally, each cell expresses the probability vt(j) = max q1,...,qt−1 P(q1...qt−1, o1, o2...ot, qt=j|λ)
+   * We represent the most probable path by taking the maximum over all possible previous state sequences max q1,...,qt−1
