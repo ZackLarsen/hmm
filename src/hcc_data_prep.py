@@ -1,17 +1,72 @@
 
-
 ## Project: Hidden Markov Models for pos tagging
 ## Author: Zack Larsen
 ## Date: July 20, 2019
 
 
-#from __future__ import division
+## Outline:
+'''
+Step 1:
+    Read in the data from either a text file or nltk corpus
+Step 2:
+    Create list of tokens
+    Create list of POS tags
+    Create list of (token, pos) tuples
+Step 3:
+    Create list of unique tokens
+    Create list of unique pos tags
+    Create list of unique pos tags but with <START> added to
+        beginning of it as a tag
+Step 4:
+    Create a default dictionary with {tag: count} values
+    for all tags
+Step 5:
+    Create a default dictionary with {bigram: count} values
+    for all bigrams of POS tags
+Step 6: (optional)
+    Create a default dictionary with {trigram: count}
+    value for all trigrams of POS tags
+Step 7:
+    Create matrix_a for transition probabilities from state i to
+    state j
+Step 8:
+    Create matrix_b for emission probabilities
+Step 9:
+    Create matrix_v for Viterbi lattice
+'''
+
+
+## Main data structures:
+'''
+tag_counts
+bigram_counts
+unique_pos
+start_pos
+matrix_A (transitions) (n_unique_tags + 1, n_unique_tags)
+matrix_B (emissions) (n_unique_tokens * n_unique_tags)
+matrix_V (Viterbi lattice) (n_tags * n_tokens)
+'''
+
+
+## Main variables
+'''
+n_tokens
+n_unique_tokens
+n_tags
+n_unique_tags
+n_bigrams
+n_unique_bigrams
+'''
+
+
 import re, pprint, sys, datetime, os
 from collections import defaultdict, Counter
-#from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
-#import shelve
+import nltk
+from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
+from nltk import corpus
 import numpy as np
 from scipy.sparse import csr_matrix
+#import shelve
 
 
 def unigram(tag_list):
@@ -44,7 +99,7 @@ def find_ngrams(input_list, n):
     return zip(*[input_list[i:] for i in range(n)])
 
 
-def file_prep(filename, lowercase = False):
+def file_prep(filename, nrows = 100, lowercase = False):
     '''
     Read file, create a list of tokens, a list of parts-of-speech
     (pos), and a data dictionary of the token: tag co-occurrences
@@ -56,161 +111,143 @@ def file_prep(filename, lowercase = False):
     token_pos_list = []
     sentences = 0
     with open(filename) as infile:
-        read_data = infile.readlines()
+        head = [next(infile) for x in range(nrows)]
         token_list.append('<START>')
-        for line in read_data:
+        pos_list.append('<START>')
+        token_pos_list.append(tuple(('<START>','<START>')))
+        for line in head:
             line = line.strip('\n')
             chars = line.split(' ')
             if len(chars) == 3:
+                token = chars[0]
+                pos = chars[1]
                 if lowercase:
-                    token_list.append(chars[0].lower()) # Token, lowercased
-                    token_pos_list.append(tuple((chars[0].lower(),chars[1])))
+                    token_list.append(token.lower())
+                    token_pos_list.append(tuple((token.lower(), pos)))
                 elif not lowercase:
-                    token_list.append(chars[0]) # Token
-                    token_pos_list.append(tuple((chars[0], chars[1])))
-                pos_list.append(chars[1]) # pos
+                    token_list.append(token)
+                    token_pos_list.append(tuple((token, pos)))
+                pos_list.append(pos)
             elif len(chars) != 3:
                 sentences += 1
                 token_list.append('<STOP>')
                 token_list.append('<START>')
                 pos_list.append('<STOP>')
                 pos_list.append('<START>')
+                token_pos_list.append(tuple(('<STOP>', '<STOP>')))
+                token_pos_list.append(tuple(('<START>', '<START>')))
         token_list.append('<STOP>')
+        pos_list.append('<STOP>')
+        token_pos_list.append(tuple(('<STOP>', '<STOP>')))
     print(sentences, "sentences read in.")
     return token_list, pos_list, token_pos_list
 
 
+## Step 1
+
+# POS tag file from text file:
+dirname = os.path.dirname('/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm/')
+WSJ_train = os.path.join(dirname, 'data/WSJ-train.txt')
+WSJ_test = os.path.join(dirname, 'data/WSJ-test.txt')
+
+# POS tag file from nltk.corpus:
+# nltk.download('treebank')
+# nltk.download('universal_tagset')
+# WSJ = corpus.treebank.tagged_words(tagset='universal')
+# WSJ[:100]
+# len(WSJ) # 100,676
 
 
+## Step 2
 
-token_list, pos_list, token_pos_list = file_prep('WSJ_head.txt', lowercase=True)
-
+token_list, pos_list, token_pos_list = file_prep(WSJ_train, nrows=10000, lowercase=True)
 token_list
 pos_list
 token_pos_list
 
 
+## Step 3
 
+unique_tokens = np.unique(token_list)
+n_unique_tokens = len(unique_tokens)
 
-
-
-
-
-
-## Create numpy ndarray and then list of UNIQUE pos tags:
 unique_pos = np.unique(pos_list)
 unique_pos = list(unique_pos)
+n_unique_tags = len(unique_pos)
 
-## Add in start and stop tags
-## Do we need to do below? Or is it okay to have '.' as the
-## STOP equivalent for the end of sentence tag? And then we
-## would have no START tag.
-#unique_pos.insert(0,'<START>')
-#unique_pos
-#unique_pos.insert(len(unique_pos),'<STOP>')
-
-#unique_pos
-#len(unique_pos) # 32
+## Add in start tags
+#start_pos = unique_pos.copy()
+#start_pos.insert(0,'<START>')
 
 
+## Step 4
+
+## Calculate number of times each tag occurs:
+tag_counts, tag_model = unigram(pos_list)
+## Add in the count for <START> tags:
+#start_count = token_list.count('<START>')
+#tag_counts['<START>'] = start_count
 
 
-#len(token_list) # 518
-#len(pos_list) # 484
-## Difference in length here is due to START and STOP tokens
-## not having a corresponding pos tag
+## Step 5
+
+## Create bigrams of tags and then count them:
+bigrams = find_ngrams(pos_list, 2)
+bigram_counts = defaultdict(int)
+for bigram in bigrams:
+    bigram_counts[bigram] += 1
+
+n_unique_bigrams = len(bigram_counts.keys())
 
 
+## Step 6 (optional):
+# trigrams = find_ngrams(pos_list, 3)
+# trigram_counts = defaultdict(int)
+# for trigram in trigrams:
+#     trigram_counts[trigram] += 1
 
 
-
-
-
+## Step 7
 
 ## Create transition probability matrix A (dimensions (N + 1) * N):
+N1 = len(start_pos)
+N2 = len(unique_pos)
+matrix_a = np.zeros((N1,N2))
 
-
-## First, calculate number of times each tag occurs:
-tag_counts, tag_model = unigram(pos_list)
-#tag_counts
-#tag_model
-
-#len(tag_counts)
-#sum(tag_counts.values())
-
-
-## Second, create bigrams of tags and then count them:
-bigrams = find_ngrams(pos_list, 2)
-#for bigram in bigrams:
-#    print(list(bigram))
-
-bigram_dd = defaultdict(int)
-for bigram in bigrams:
-    bigram_dd[bigram] += 1
-#bigram_dd
-
-#bigram_sample = ('VBZ', 'VBN')
-#type(bigram_sample)
-#bigram_sample[0]
-
-
-## Thirdly, calculate probability of tag t given that it is
+## Calculate probability of tag t given that it is
 ## preceded by tag t-1 (P(t|(t,t-1))
 ## Do this by dividing the bigram count by the unigram count:
 ## C(ti−1,ti) / C(ti−1)
 
-# First, create empty matrix of correct dimensions N * N:
-N = len(unique_pos)
-matrix_a = np.zeros((N+1,N))
-
 ## Populating cells of matrix_a:
-for i, tag_i in enumerate(unique_pos):
+for i, tag_i in enumerate(start_pos):
     for j, tag_j in enumerate(unique_pos):
-        bigram = tuple((unique_pos[i],unique_pos[j]))
-        bigram_count = bigram_dd[bigram]
-        unigram_count = tag_counts[unique_pos[i]]
+        bigram = tuple((tag_i, tag_j))
+        bigram_count = bigram_counts[bigram]
+        unigram_count = tag_counts[tag_i]
         a = bigram_count / unigram_count
         matrix_a[i,j] = a
-
-matrix_a
-
-
-
+## Verify that the start tag probabilities sum to 1:
+if matrix_a[0,:].sum() != 1:
+    print('ERROR: <START> tag probabilities do not form a valid probability distribution')
 
 
-
+## Step 8
 
 ## Matrix B (emission probabilities, P(wi|ti)), represents
 ## the probability, given a tag, that it will be associated
 ## with a given word. The MLE of the emission probability is
 ## P(wi|ti) = C(ti,wi) / C(ti).
 
-## Step 1: calculate co-occurrences of tokens and tags (C(ti,wi)):
-
-token_tag_dd = defaultdict(int)
+## Calculate co-occurrences of tokens and tags (C(ti,wi)):
+token_tag_counts = defaultdict(int)
 for pairing in token_pos_list:
-    token_tag_dd[pairing] += 1
+    token_tag_counts[pairing] += 1
 
-token_tag_dd
+## Construct empty matrix_b
+matrix_b = np.zeros((n_unique_tokens, n_unique_tags))
 
-len(token_list) # 2595
-len(np.unique(token_list)) # 754, 712 after lowercasing
-
-
-## Step 2: Constructing empty matrix_b
-## Might need to use sparse implementation:
-#csr_matrix((3, 4), dtype=np.int8).toarray()
-
-unique_tokens = np.unique(token_list)
-Nw = len(unique_tokens)
-Nt = len(unique_pos)
-matrix_b = np.zeros((Nw,Nt))
-matrix_b
-matrix_b.shape # (712, 40), used to be (754, 40) before lowercasing the tokens
-
-
-## Step 3: Populating cells of matrix_b:
-
+## Populate cells of matrix_b:
 for i, token in enumerate(unique_tokens):
     for j, tag in enumerate(unique_pos):
         token_tag_tuple = tuple((unique_tokens[i],unique_pos[j]))
@@ -219,7 +256,12 @@ for i, token in enumerate(unique_tokens):
         b = token_tag_count / tag_count
         matrix_b[i,j] = b
 
-matrix_b
+
+## Step 9
+
+## Create viterbi probability trellis / lattice of dimensions
+## n_unique_tags * n_unique_tokens
+matrix_v = np.zeros((n_unique_tags, n_unique_tokens))
 
 
 
@@ -240,14 +282,11 @@ matrix_b
 
 
 
+## Extras
+'''
 
-
-
-
-
-
-
-
+## Sparse matrix implementation:
+#csr_matrix((3, 4), dtype=np.int8).toarray()
 
 sent_tokenize_list = sent_tokenize(text)
 
@@ -315,3 +354,4 @@ d.close()
 d = shelve.open('unigrams.db')
 d['unigrams'] = unigrams
 d.close()
+'''
