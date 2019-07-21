@@ -15,3 +15,6 @@
 #### An HMM has two probability matrices, A and B:
    * **Matrix A** contains the tag transition probabilities P(ti|ti−1) which represent the probability of a tag occurring given the previous tag. We compute the maximum likelihood estimate of this transition probability by counting, out of the times we see the first tag in a labeled corpus, how often the first tag is followed by the second: P(ti|ti−1) = C(ti−1,ti) / C(ti−1). This matrix will have dimensions (N * N), where N is the number of tags.
    * **Matrix B** (emission probabilities, P(wi|ti)), represents the probability, given a tag, that it will be associated with a given word. The MLE of the emission probability is P(wi|ti) = C(ti,wi) / C(ti).
+
+#### The  goal  of  HMM  decoding:
+   * Choose  the  state sequence s1 that is most probable given the observation sequence of n observations On1:
