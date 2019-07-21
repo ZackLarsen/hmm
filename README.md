@@ -35,10 +35,10 @@
      * <img src="https://render.githubusercontent.com/render/math?math=P(t_1^{n}) \approx \Pi_{i=1}^{n} P(t_{i} \mid t_{i-1})">
 
 #### With our two simplifying assumptions, the equation for the most probable tag sequence simplifies to:
-   * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ \mid w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i \mid t_i) P(t_{i} \mid t_{i-1})">
+   * <img src="https://render.githubusercontent.com/render/math?math=t_1^{n} = argmax P(t_1^{n}_ \mid w_1^{n}) \approx argmax \Pi_{i=1}^{n} P(w_i \mid t_i) P(t_i \mid t_{i-1})">
    * <img src="https://render.githubusercontent.com/render/math?math=P(w_i \mid t_i)"> 
      Corresponds to our emission probability matrix.
-   * <img src="https://render.githubusercontent.com/render/math?math=P(t_{i} \mid t_{i-1})"> 
+   * <img src="https://render.githubusercontent.com/render/math?math=P(t_i \mid t_{i-1})"> 
      Corresponds to our transmission probability matrix.
 
 #### The Viterbi decoding algorithm:
