@@ -2,6 +2,7 @@
 ## Project: Hidden Markov Models for pos tagging
 ## Author: Zack Larsen
 ## Date: July 20, 2019
+## Script purpose: create POS tagger for WSJ articles
 
 
 ## Outline:
@@ -68,7 +69,9 @@ import nltk
 from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
 from nltk import corpus
 import numpy as np
+import pandas as pd
 from scipy.sparse import csr_matrix
+from numba import jit
 #import shelve
 
 
@@ -100,6 +103,18 @@ def find_ngrams(input_list, n):
     :return: A generator object with ngrams
     '''
     return zip(*[input_list[i:] for i in range(n)])
+
+
+def token_to_int(tokens):
+    '''
+    Take a list of tokens and map them to integers
+    :param token_list: List of tokens
+    :return: Dictionary mapping each token to a unique integer
+    '''
+    unique_token_list = np.unique(tokens)
+    unique_token_list.sort(kind='quicksort')
+    token_map = {token: value for token, value in zip(unique_token_list, range(1,len(unique_token_list)))}
+    return token_map
 
 
 def file_prep(filename, nrows = 100, lowercase = False):
@@ -167,6 +182,14 @@ token_list, pos_list, token_pos_list = file_prep(WSJ_train, nrows=10000, lowerca
 token_list
 pos_list
 token_pos_list
+
+## (Optional): After creating token_list, we can map tokens to integers:
+token_map = token_to_int(token_list)
+token_map
+len(token_map)
+## Reversing dictionary from above:
+int_to_token = dict(map(reversed, token_map.items()))
+int_to_token
 
 
 ## Step 3
@@ -268,6 +291,14 @@ matrix_v = np.zeros((n_unique_tags, n_unique_tokens))
 matrix_v.shape
 matrix_a.shape
 matrix_b.shape
+
+matrix_b.T.shape
+
+
+
+
+
+
 
 
 
