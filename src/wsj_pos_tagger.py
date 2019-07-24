@@ -117,6 +117,16 @@ def token_to_int(tokens):
     return token_map
 
 
+def viterbi_decoder(sequence):
+    '''
+    Take a sequence of tokens and generate associated states by
+    computing the most probable path
+    :param sequence: Sequence of tokens/words/observations
+    :return: sequence of tags/states
+    '''
+
+
+
 def file_prep(filename, nrows = 100, lowercase = False):
     '''
     Read file, create a list of tokens, a list of parts-of-speech
