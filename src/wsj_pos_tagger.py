@@ -171,6 +171,54 @@ def file_prep(filename, nrows = 100, lowercase = False):
     return token_list, pos_list, token_pos_list
 
 
+# https://github.com/ssghule/Hidden-Markov-Models-and-Viterbi-in-Natural-Language-Processing/blob/master/pos_solver.py
+def hmm_viterbi(self, sentence):
+    """Returns most likely POS tags of words in a sentence
+       by performing Viterbi algorithm
+    :param sentence: List of words (string)
+    :return: List of tags
+    """
+    tag_list = list(tag_set)  # Converting tag_set to a list to have indexes to refer
+    rows = len(tag_list)
+    cols = len(sentence)
+    compatibility_matrix = [[None] * cols for i in range(rows)]
+
+    # Storing a tuple in each cell (index of the previous cell, probability of the current cell)
+    for col_index, curr_word in enumerate(sentence):
+        curr_emission_probs = self.get_emission_probs(curr_word)
+        for row_index, curr_tag in enumerate(tag_list):
+            # Computing the probabilities for the first column
+            if col_index == 0:
+                init_prob = self.init_prob[curr_tag] if curr_word in self.init_prob else max_val
+                compatibility_matrix[row_index][col_index] = (-1, curr_emission_probs[curr_tag] + init_prob)
+            # Computing the probabilities of the other columns
+            else:
+                best_prob_tuple = (-1, max_val)
+                for prev_row_index, prev_tag in enumerate(tag_list):
+                    prev_prob = compatibility_matrix[prev_row_index][col_index - 1][1]
+                    curr_prob = prev_prob + curr_emission_probs[curr_tag] + self.trans_prob[prev_tag][curr_tag]
+                    if curr_prob < best_prob_tuple[1]:
+                        best_prob_tuple = (prev_row_index, curr_prob)
+                compatibility_matrix[row_index][col_index] = best_prob_tuple
+
+    # Backtracking to fetch the best path
+    # Finding the cell with the max probability from the last column
+    (max_index, max_prob) = (-1, max_val)
+    for row in range(rows):
+        curr_prob = compatibility_matrix[row][cols - 1][1]
+        if curr_prob < max_prob:
+            (max_index, max_prob) = (row, curr_prob)
+
+    output_tag_list = list()  # List to store the output tags
+    # Adding the best path to output list
+    for col in range(cols - 1, 0, -1):
+        output_tag_list.insert(0, tag_list[max_index])
+        max_index = compatibility_matrix[max_index][col][0]
+    output_tag_list.insert(0, tag_list[max_index])
+    return output_tag_list
+
+
+
 ## Step 1
 
 # POS tag file from text file:
