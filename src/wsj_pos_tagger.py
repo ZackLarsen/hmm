@@ -126,7 +126,6 @@ def viterbi_decoder(sequence):
     '''
 
 
-
 def file_prep(filename, nrows = 100, lowercase = False):
     '''
     Read file, create a list of tokens, a list of parts-of-speech

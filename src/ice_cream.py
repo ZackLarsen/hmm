@@ -10,6 +10,146 @@ from numba import jit
 import time
 
 
+def forward(observations, states):
+    '''
+    Note: This algorithm is intractible due to the number of calculations that
+    must be performed. The standard way to find the optimal path of a hidden markov
+    model is the Viterbi decoding algorithm, defined in a function viterbi() below.
+
+    Given a sequence of observations q, calculate the forward probabilities
+    of each state in the sequence. Return the most probable path.
+    Consists of three major steps:
+        1. Initialization
+        2. Recursion
+        3. Termination
+
+    :param observations: Length T
+    :param states: Length N
+    :return Forward probability for path
+    '''
+    # Initialization step: create forward probability matrix [N,T]
+    # and fill the first column with the initial probabilities
+    N = len(observations)
+    T = len(states)
+    forward_trellis = np.zeros([N,T])
+    # For each state s from 1 to N:
+    #   forward[s,1] ← πs ∗ bs(o1)
+    #   the forward matrix entry at [s,1] will be equal to
+    #   Pi(s) * b[s](o1), which means the initial probability
+    #   of state s (P(s|START)) times the emission probability
+    #   matrix at entry [s,observation 1] for P(s| observation 1)
+    for s, state in enumerate(states):
+        forward_trellis[s, 1] = Pi[s-1] * emissions[s, observations[1]]
+
+    # Recursion step: fill the remaining columns in the trellis
+    # for each time step t from 2 to T:
+        # for each state s from 1 to N:
+            # forward_trellis[s, t] =
+            # Sum from s'=1 to N of forward_trellis[s′, t−1] ∗ a[s', s] ∗ b[s, (ot)]
+    for t in range(2,T):
+        for s in range(1,N):
+            forward_trellis[s, t] =
+
+    # Termination step:
+    # sum from s=1 to N of forward_trellis[s, T]
+    forwardprob = forward_trellis[:, T]
+    return forwardprob
+
+
+@jit(nopython=True)
+def viterbi(observations, states):
+    '''
+    Compute the optimal sequence of hidden states
+    :param observations:
+    :param states:
+    :return: bestpath, bestpathprob
+    '''
+    T = len(observations)
+    N = len(states)
+    viterbi_trellis = np.empty([N, T])
+    backpointer = np.empty([N, T])
+
+    # Initialize
+    for s, state in enumerate(states):
+        viterbi_trellis[s, 1] = Pi[s-1] * emissions[s, observations[1]]
+        backpointer[s, 1] = 0
+
+    # Recursion
+    for time_step in range(2, T):
+        for current_state in range(1, N):
+            previous_viterbi_states = np.zeros([T])
+            for previous_state in range(1, N):
+                previous_viterbi_states[previous_state] =
+            viterbi[current_state, time_step] = np.amax(previous_viterbi_states, axis=0)
+            backpointer[current_state, time_step] = np.argmax(previous_viterbi_states, axis=0)
+
+    # Termination
+    bestpathprob = np.amax(viterbi, axis=0)
+    bestpathpointer = np.argmax(viterbi, axis=0)
+    bestpath = '''the path starting at state bestpathpointer that traverses backpointer to 
+        states back in time'''
+
+    return bestpath, bestpathprob
+
+
+
+
+
+
+# Transition probability matrix
+transitions = np.array([0.5,0.3,0.2,
+              0.4,0.6,0.8,
+              0.1,0.1,0])
+transitions
+
+
+# Emission probability matrix
+emissions = np.array([0.5,0.2,
+              0.4,0.4,
+              0.1,0.4])
+emissions
+
+
+# Initial probabilities
+Pi = np.array([0.8, 0.2])
+Pi
+
+
+
+
+
+
+observations = ['Cold','Hot']
+states = [3,1,3]
+N = len(observations)
+T = len(states)
+forward_trellis = np.empty([N,T])
+forward_trellis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def viterbi(y, A, B, Pi=None):
     """
     https://stackoverflow.com/questions/9729968/python-implementation-of-viterbi-algorithm
@@ -68,20 +208,8 @@ def viterbi(y, A, B, Pi=None):
 
 
 
-A = np.array([0.6,0.4,
-              0.4,0.6])
-A
 
-
-B = np.array([0.5,0.2,
-              0.4,0.4,
-              0.1,0.4])
-B
-
-
-Pi = np.array([])
-
-
+# Observations to decode:
 y = np.array([3, 1, 3])
 y
 
@@ -128,27 +256,3 @@ end = time.time()
 print("Elapsed (after compilation) = %s" % (end - start))
 
 
-
-
-
-
-
-## Exactly as it appears in the Excel workbook example:
-
-A = np.array([0.5,0.3,0.2,
-              0.4,0.6,0.8,
-              0.1,0.1,0])
-A
-
-
-B = np.array([0.5,0.2,
-              0.4,0.4,
-              0.1,0.4])
-B
-
-
-Pi
-
-
-y = np.array([3, 1, 3])
-y
