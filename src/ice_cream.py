@@ -79,7 +79,9 @@ def viterbi(observations, states):
         for current_state in range(1, N):
             previous_viterbi_states = np.zeros([T])
             for previous_state in range(1, N):
-                previous_viterbi_states[previous_state] =
+                previous_viterbi_states[previous_state] = viterbi[previous_state, time_step-1] * \
+                                                          transitions[current_state, previous_state] * \
+                                                          emissions[current_state, time_step]
             viterbi[current_state, time_step] = np.amax(previous_viterbi_states, axis=0)
             backpointer[current_state, time_step] = np.argmax(previous_viterbi_states, axis=0)
 
