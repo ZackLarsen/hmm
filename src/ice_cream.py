@@ -99,41 +99,81 @@ def viterbi(observations, states):
 
 
 # Transition probability matrix
-transitions = np.array([0.5,0.3,0.2,
-              0.4,0.6,0.8,
-              0.1,0.1,0])
+transitions = np.array([[0.5,0.3,0.2],
+              [0.4,0.6,0.8],
+              [0.1,0.1,0]])
 transitions
 
-
 # Emission probability matrix
-emissions = np.array([0.5,0.2,
-              0.4,0.4,
-              0.1,0.4])
+emissions = np.array([[0.5,0.2],
+              [0.4,0.4],
+              [0.1,0.4]])
 emissions
 
-
 # Initial probabilities
-Pi = np.array([0.8, 0.2])
+Pi = np.array([0.2, 0.8])
 Pi
 
+states = ['Cold','Hot']
+observations = [3,1,3]
+N = len(states)
+T = len(observations)
+
+
+viterbi_trellis = np.zeros([N, T])
+backpointer = np.zeros([N, T])
+
+for s, state in enumerate(states):
+    print(s, state)
+# 0 Cold
+# 1 Hot
+
+
+
+# s = 0, state = Cold
+viterbi_trellis[s, 0] = P(s|START) * emissions(observation, state)
+viterbi_trellis[0, 0] = Pi[s] * emissions[observations[0], 'Cold']
+viterbi_trellis[0, 0] = Pi[s] * emissions['3', 'Cold']
+viterbi_trellis[0, 0] = Pi[s] * emissions['3', s]
+viterbi_trellis[0, 0] = Pi[0] * emissions[2, 0]
+
+# s = 1, state = Hot
+viterbi_trellis[s, 0] = P(s|START) * emissions(observation, state)
+viterbi_trellis[1, 0] = Pi[s] * emissions[observations[0], 'Hot']
+viterbi_trellis[1, 0] = Pi[s] * emissions['3', 'Hot']
+viterbi_trellis[1, 0] = Pi[s] * emissions['3', s]
+viterbi_trellis[1, 0] = Pi[1] * emissions[2, 1]
+
+
+
+# Initialize
+for s, state in enumerate(states):
+    viterbi_trellis[s, 0] = Pi[s] * emissions[observations[0]-1, s]
+    backpointer[s, 0] = 0
 
 
 
 
 
-observations = ['Cold','Hot']
-states = [3,1,3]
-N = len(observations)
-T = len(states)
-forward_trellis = np.empty([N,T])
-forward_trellis
+# Recursion
+for time_step in range(1, T):
+    for current_state in range(1, N):
+        previous_viterbi_states = np.zeros([T])
+        for previous_state in range(1, N):
+            previous_viterbi_states[previous_state] = viterbi_trellis[previous_state, time_step - 1] * \
+                                                      transitions[current_state, previous_state] * \
+                                                      emissions[current_state, time_step]
+        viterbi_trellis[current_state, time_step] = np.amax(previous_viterbi_states, axis=0)
+        backpointer[current_state, time_step] = np.argmax(previous_viterbi_states, axis=0)
+
+# Termination
+bestpathprob = np.amax(viterbi, axis=0)
+bestpathpointer = np.argmax(viterbi, axis=0)
 
 
-
-
-
-
-
+for time_step in range(1, T):
+    for current_state in range(1, N):
+        print(time_step, current_state)
 
 
 
