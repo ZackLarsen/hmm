@@ -71,23 +71,25 @@ def viterbi(observations, states):
 
     # Initialize
     for s, state in enumerate(states):
-        viterbi_trellis[s, 1] = Pi[s-1] * emissions[s, observations[1]]
-        backpointer[s, 1] = 0
+        viterbi_trellis[s, 0] = Pi[s] * emissions[observations[0] - 1, s]
+        backpointer[s, 0] = 0
 
     # Recursion
-    for time_step in range(2, T):
-        for current_state in range(1, N):
-            previous_viterbi_states = np.zeros([T])
-            for previous_state in range(1, N):
-                previous_viterbi_states[previous_state] = viterbi[previous_state, time_step-1] * \
-                                                          transitions[current_state, previous_state] * \
-                                                          emissions[current_state, time_step]
-            viterbi[current_state, time_step] = np.amax(previous_viterbi_states, axis=0)
-            backpointer[current_state, time_step] = np.argmax(previous_viterbi_states, axis=0)
+    for time_step in range(1, T):
+        for cs, current_state in enumerate(states):
+            priors = np.zeros([N, N])
+            for ps, previous_state in enumerate(states):
+                # print(time_step, cs, current_state, ps, previous_state)
+                priors[ps, cs] = viterbi_trellis[ps, time_step - 1] * \
+                                 transitions[cs, ps] * \
+                                 emissions[observations[time_step] - 1, cs]
+            # print(priors)
+            viterbi_trellis[cs, time_step] = np.amax(priors[:, 0], axis=0)
+            backpointer[cs, time_step] = np.argmax(priors[:, 0], axis=0)
 
     # Termination
-    bestpathprob = np.amax(viterbi, axis=0)
-    bestpathpointer = np.argmax(viterbi, axis=0)
+    bestpathprob = np.amax(viterbi_trellis[:,-1])
+    bestpathpointer = np.argmax(viterbi_trellis[:,-1])
     bestpath = '''the path starting at state bestpathpointer that traverses backpointer to 
         states back in time'''
 
@@ -152,30 +154,41 @@ for s, state in enumerate(states):
     backpointer[s, 0] = 0
 
 
+viterbi_trellis
+backpointer
+
+
+
 
 
 
 # Recursion
 for time_step in range(1, T):
-    for current_state in range(1, N):
-        previous_viterbi_states = np.zeros([T])
-        for previous_state in range(1, N):
-            previous_viterbi_states[previous_state] = viterbi_trellis[previous_state, time_step - 1] * \
-                                                      transitions[current_state, previous_state] * \
-                                                      emissions[current_state, time_step]
-        viterbi_trellis[current_state, time_step] = np.amax(previous_viterbi_states, axis=0)
-        backpointer[current_state, time_step] = np.argmax(previous_viterbi_states, axis=0)
+    for cs, current_state in enumerate(states):
+        priors = np.zeros([N,N])
+        for ps, previous_state in enumerate(states):
+            #print(time_step, cs, current_state, ps, previous_state)
+            priors[ps, cs] = viterbi_trellis[ps, time_step - 1] * \
+                             transitions[cs, ps] * \
+                             emissions[observations[time_step]-1, cs]
+        #print(priors)
+        viterbi_trellis[cs, time_step] = np.amax(priors[:,0], axis=0)
+        backpointer[cs, time_step] = np.argmax(priors[:,0], axis=0)
+
+
+viterbi_trellis
+backpointer
+
+
+
+
+
+
+
 
 # Termination
-bestpathprob = np.amax(viterbi, axis=0)
-bestpathpointer = np.argmax(viterbi, axis=0)
-
-
-for time_step in range(1, T):
-    for current_state in range(1, N):
-        print(time_step, current_state)
-
-
+bestpathprob = np.amax(viterbi_trellis[:,-1])
+bestpathpointer = np.argmax(viterbi_trellis[:,-1])
 
 
 
