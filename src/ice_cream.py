@@ -181,14 +181,18 @@ backpointer
 
 
 
-
-
-
-
-
 # Termination
 bestpathprob = np.amax(viterbi_trellis[:,-1])
 bestpathpointer = np.argmax(viterbi_trellis[:,-1])
+
+
+
+
+
+
+# Find best path:
+bestpathprob
+bestpathpointer
 
 
 
