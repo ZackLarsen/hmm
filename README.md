@@ -49,3 +49,4 @@
    * Formally, each cell expresses the probability vt(j):
      * <img src="https://render.githubusercontent.com/render/math?math=v_t(j) = max_{q1,\ldots,qt-1} P(q_1 \ldots q_{t-1}, o_1, o_2 \ldots o_t, qt=j \mid \lambda)">
    * We represent the most probable path by taking the maximum over all possible previous state sequences max q1,...,qt−1
+<img src="img/Viterbi.png">
