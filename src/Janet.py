@@ -189,7 +189,10 @@ bestpath = '''the path starting at state bestpathpointer that traverses backpoin
 
 
 
-
+# First dimension in all_priors is for number of time steps minus 1 for the first one.
+# Second dimension is for the current state
+# Third dimension is for the previous state
+# Fourth dimension is 2 because we will have the previous state and the previous state probability
 all_priors = np.zeros([T-1,N,N,2])
 for time_step in range(1, T):
     for cs in range(0, N):
