@@ -215,5 +215,3 @@ all_priors[3][6][:,1]
 
 np.amax(all_priors[3][6][:,1], axis=0)
 np.argmax(all_priors[3][6][:,1], axis=0)
-
-
