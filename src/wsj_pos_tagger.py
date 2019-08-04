@@ -86,8 +86,18 @@ from scipy.sparse import csr_matrix
 
 
 
+
+
 sys.path
+
+# Windows:
 sys.path.append('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\src')
+
+# Mac OS X:
+sys.path.append(os.path.join(homedir, 'src/'))
+
+
+
 
 import hmm
 from hmm import *
@@ -99,8 +109,18 @@ importlib.reload(hmm)
 
 
 # POS tag file from text file:
+
+# Windows:
 homedir = os.path.dirname('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\')
 WSJ_head = os.path.join(homedir, 'data\\WSJ_head.txt')
+
+# Mac OS X:
+homedir = os.path.dirname('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/')
+WSJ_head = os.path.join(homedir, 'data/WSJ_head.txt')
+WSJ_train = os.path.join(homedir, 'data/WSJ-train.txt')
+WSJ_test = os.path.join(homedir, 'data/WSJ-test.txt')
+
+
 
 
 # POS tag file from nltk.corpus:
@@ -114,7 +134,7 @@ WSJ = corpus.treebank.tagged_words(tagset='universal')
 
 
 # From text file
-token_list, pos_list, token_pos_list = file_prep(WSJ_train,
+token_list, tag_list, token_tag_list = file_prep(WSJ_train,
                                                  nrows=4000,
                                                  lowercase=True)
 
@@ -149,8 +169,8 @@ integer_tuple_list = [tuple([a,b]) for a,b in zip(integer_token_list, integer_ta
 unique_integer_tokens = list(np.unique(integer_token_list))
 unique_integer_tags = list(np.unique(integer_tag_list))
 
-token_count = Counter(integer_token_list)
-tag_count = Counter(integer_tag_list)
+token_counts = Counter(integer_token_list)
+tag_counts = Counter(integer_tag_list)
 token_tag_counts = Counter(integer_tuple_list)
 
 bigrams = find_ngrams(integer_tag_list, 2)
@@ -169,13 +189,11 @@ emissions_matrix = create_emissions(unique_integer_tokens, unique_integer_tags,
                                     token_tag_counts, tag_counts, n_tokens,
                                     n_tags)
 
-Pi = create_pi('.', emissions_matrix, token_map)
+Pi = create_pi('<START>', emissions_matrix, token_map)
 
-transition_matrix.shape # 12, 12
-emissions_matrix.shape # 12, 11387
-Pi.shape # 12,
-
-
+transition_matrix.shape # 42, 42
+emissions_matrix.shape # 42, 1248
+Pi.shape # 42,
 
 
 
@@ -183,14 +201,16 @@ Pi.shape # 12,
 
 
 
-nouns = {key: value for key, value in token_tag_counts.items() if key[1] == 6}
+
+
+nouns = {key: value for key, value in token_tag_counts.items() if key[1] == tag_map['NNP']}
 nouns
 
 nouns.keys()
 nouns.values()
 
 sum(nouns.values())
-tag_count[6]
+tag_count[tag_map['NNP']]
 
 
 
@@ -199,8 +219,11 @@ for tag in unique_integer_tags:
 
 
 
-emissions_matrix[:, 465].sum()
-emissions_matrix[465,:].sum()
+
+
+
+emissions_matrix[:, tag_map['<START>']].sum()
+emissions_matrix[tag_map['<START>'],:].sum()
 emissions_matrix[:, :].sum()
 
 
