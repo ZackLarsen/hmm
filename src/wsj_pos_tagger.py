@@ -108,8 +108,9 @@ importlib.reload(hmm)
 
 
 
-# POS tag file from text file:
 
+
+# POS tag file from text file:
 # Windows:
 homedir = os.path.dirname('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\')
 WSJ_head = os.path.join(homedir, 'data\\WSJ_head.txt')
@@ -120,6 +121,11 @@ WSJ_head = os.path.join(homedir, 'data/WSJ_head.txt')
 WSJ_train = os.path.join(homedir, 'data/WSJ-train.txt')
 WSJ_test = os.path.join(homedir, 'data/WSJ-test.txt')
 
+# From text file
+token_list, tag_list, token_tag_list = file_prep(WSJ_train,
+                                                 nrows=4000,
+                                                 lowercase=True)
+
 
 
 
@@ -128,23 +134,12 @@ WSJ_test = os.path.join(homedir, 'data/WSJ-test.txt')
 #nltk.download('universal_tagset')
 WSJ = corpus.treebank.tagged_words(tagset='universal')
 
-
-
-
-
-
-# From text file
-token_list, tag_list, token_tag_list = file_prep(WSJ_train,
-                                                 nrows=4000,
-                                                 lowercase=True)
-
-
-
 # From nltk corpus
 token_list = [token[0].lower() for token in WSJ]
 tag_list = [tag[1] for tag in WSJ]
-#token_tag_list = WSJ
-token_tag_list = [tuple([token.lower(), tag]) for token, tag in WSJ]
+token_tag_list = [tuple([token.lower(), tag]) for token, tag in WSJ] # Or, #token_tag_list = WSJ
+
+
 
 
 
@@ -182,7 +177,7 @@ n_bigrams = len(bigram_counts.keys())
 
 
 
-transition_matrix = create_transitions(unique_integer_tags, bigram_counts,
+transitions_matrix = create_transitions(unique_integer_tags, bigram_counts,
                                        tag_counts, n_tags)
 
 emissions_matrix = create_emissions(unique_integer_tokens, unique_integer_tags,
@@ -191,12 +186,22 @@ emissions_matrix = create_emissions(unique_integer_tokens, unique_integer_tags,
 
 Pi = create_pi('<START>', emissions_matrix, token_map)
 
+
+
+emissions_matrix[tag_map['<START>'],:].sum()
+emissions_matrix[:,token_map['<START>']].sum()
+
+
+
+
 transition_matrix.shape # 42, 42
 emissions_matrix.shape # 42, 1248
 Pi.shape # 42,
 
 
 
+
+tag_map['<START>']
 
 
 
@@ -214,18 +219,95 @@ tag_count[tag_map['NNP']]
 
 
 
-for tag in unique_integer_tags:
-    print(tag)
 
 
 
 
 
 
-emissions_matrix[:, tag_map['<START>']].sum()
-emissions_matrix[tag_map['<START>'],:].sum()
-emissions_matrix[:, :].sum()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Example WSJ sentence from test set to tag:
+'''
+Mr. NNP
+Carlucci NNP
+, ,
+59 CD
+years NNS
+old JJ
+, ,
+served VBN
+as IN
+defense NN
+secretary NN
+in IN
+the DT
+Reagan NNP
+administration NN
+. .
+'''
+
+test_sentence = ['Mr.','Carlucci','','59','years','old','','served','as','defense','secretary','in','the','Reagan','administration','.']
+test_sentence
+[word.lower() for word in test_sentence]
+
+
+
+correct_hidden_states = ['NNP','NNP',',','CD','NNS','JJ',',','VBN','IN','NN','IN','DT','NNP','NN']
+
+
+
+
+
+
+# Convert observations to integers. If token is not a key in token_map dictionary,
+# use the <UNK> token for 'unknown':
+observations = []
+for word in test_sentence:
+    if word.lower() in token_map.keys():
+        observations.append(token_map[word.lower()])
+    else:
+        observations.append('<UNK>')
+
+observations
+
+
+
+
+
+# Decode the test sentence:
+viterbi_trellis, backpointer = viterbi_part1(observations, transitions_matrix, emissions_matrix, Pi)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Compute the accuracy of the viterbi decoder on the test set:
+# Here, accuracy is defined as the number of tags correctly identified
+# divided by the total number of tags produced in the decoding process for the test set.
 
 
 

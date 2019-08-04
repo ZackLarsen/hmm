@@ -1,6 +1,7 @@
 
 import numpy as np
 from numba import jit
+import math
 import re, sys, datetime, os
 from collections import defaultdict, Counter
 from scipy.sparse import csr_matrix
@@ -166,15 +167,21 @@ def create_pi(start_tag, emissions_matrix, token_map):
 
 
 @jit(nopython=True)
-def viterbi(observations, states):
+def viterbi(observations, states, transitions_matrix, emissions_matrix, Pi):
     '''
     Compute the optimal sequence of hidden states
-    :param observations:
-    :param states:
+
+    :param observations: List of tokens in sequence
+    :param states: List of tags in sequence
+    :param transitions_matrix: Matrix of probability of tag given previous tag
+    :param emissions_matrix: Matrix of probability of tag given token
+    :param Pi: Initial probability vector
+
     :return: bestpath, bestpathprob
     '''
-    N = emissions.shape[0]
-    T = len(observations)
+
+    N = emissions.shape[0] # Number of tags (hidden states)
+    T = len(observations) # Number of tokens (observations)
 
     # Initialize
     viterbi_trellis = np.zeros([N, T])
@@ -185,20 +192,77 @@ def viterbi(observations, states):
 
     # Recursion
     for time_step in range(1, T):
-        for cs in range(0, N):
+        for current_state in range(0, N):
             priors = np.zeros([N, 2])
-            for ps in range(0, N):
-                priors[ps, 0] = ps
-                priors[ps, 1] = viterbi_trellis[ps, time_step - 1] * \
-                                transitions[ps, cs] * \
-                                emissions[cs, observations[time_step] - 1]
+            for previous_state in range(0, N):
+                priors[previous_state, 0] = ps
+                priors[previous_state, 1] = math.log(viterbi_trellis[previous_state, time_step - 1]) + \
+                                            math.log(transitions[previous_state, current_state]) + \
+                                            math.log(emissions[current_state, observations[time_step] - 1])
             # print(priors)
-            viterbi_trellis[cs, time_step] = np.amax(priors[:, 1], axis=0)
-            backpointer[cs, time_step] = np.argmax(priors[:, 1], axis=0)
+            viterbi_trellis[current_state, time_step] = np.amax(priors[:, 1], axis=0)
+            backpointer[current_state, time_step] = np.argmax(priors[:, 1], axis=0)
 
     # Termination
-    bestpathprob = np.amax(viterbi_trellis[:,-1])
-    bestpathpointer = np.argmax(viterbi_trellis[:,-1])
+    bestpathprob = np.amax(viterbi_trellis[:, -1])
+    bestpathpointer = np.argmax(viterbi_trellis[:, -1])
+    bestpath = '''the path starting at state bestpathpointer that traverses backpointer to 
+        states back in time'''
+
+    return bestpath, bestpathprob
+
+
+@jit(nopython=True)
+def viterbi_part1(observations, transitions_matrix, emissions_matrix, Pi):
+    '''
+    Compute the optimal sequence of hidden states
+
+    :param observations: List of tokens (observations) in sequence
+    :param transitions_matrix: Matrix of probability of tag given previous tag
+    :param emissions_matrix: Matrix of probability of tag given token
+    :param Pi: Initial probability vector
+
+    :return: bestpath, bestpathprob
+    '''
+
+    N = emissions_matrix.shape[0] # Number of tags (hidden states)
+    T = len(observations) # Number of tokens (observations)
+
+    # Initialize
+    viterbi_trellis = np.zeros((N, T))
+    backpointer = np.zeros_like(viterbi_trellis)
+    for s in range(0, N):
+        viterbi_trellis[s, 0] = Pi[s] * emissions_matrix[s, observations[0]]
+        backpointer[s, 0] = 0
+
+    # Recursion
+    for time_step in range(1, T):
+        for current_state in range(0, N):
+            priors = np.zeros([N, 2])
+            for previous_state in range(0, N):
+                priors[previous_state, 0] = previous_state
+                priors[previous_state, 1] = math.log(viterbi_trellis[previous_state, time_step - 1]) + \
+                                            math.log(transitions_matrix[previous_state, current_state]) + \
+                                            math.log(emissions_matrix[current_state, observations[time_step] - 1])
+            # print(priors)
+            viterbi_trellis[current_state, time_step] = np.amax(priors[:, 1], axis=0)
+            backpointer[current_state, time_step] = np.argmax(priors[:, 1], axis=0)
+
+    return viterbi_trellis, backpointer
+
+
+def viterbi_part2(viterbi_trellis, backpointer):
+    """
+    Given the filled viterbi trellis and backpointer matrix, trace backwards in time
+    from the bestpathpointer to determine the most probable hidden state sequence
+
+    :param viterbi_trellis:
+    :param backpointer:
+    :return: bestpath, bestpathprob
+    """
+    # Termination
+    bestpathprob = np.amax(viterbi_trellis[:, -1])
+    bestpathpointer = np.argmax(viterbi_trellis[:, -1])
     bestpath = '''the path starting at state bestpathpointer that traverses backpointer to 
         states back in time'''
 
