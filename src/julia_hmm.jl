@@ -10,12 +10,31 @@ Pkg.add("PyCall")
 Pkg.add("RDatsets")
 Pkg.add("RCall")
 
+
 using RCall, RDatasets
 
 using PyCall
 
 using DataFrames
 using SparseArrays
+
+
+
+
+'y' ∈ "yes"
+∉
+
+
+
+
+open("myfile", "w") do file
+    write(file, "Hello")
+end
+
+
+
+
+
 
 
 
@@ -28,28 +47,6 @@ head(train, 10)
 describe(train[:LoanAmount])
 
 countmap(train[:Property_Area])
-
-
-
-
-
-
-
-
-@pyimport pandas as pd
-df = pd.read_csv("train.csv")
-
-
-
-mtcars = datasets("datasets", "mtcars");
-library(ggplot2)
-ggplot($mtcars, aes(x = WT, y=MPG)) + geom_point()
-
-
-
-
-
-
 
 
 
