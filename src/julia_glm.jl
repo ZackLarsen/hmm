@@ -25,6 +25,10 @@ describe(Chem97[:Score])
 
 boston = dataset("MASS", "boston")
 boston
+names(boston)
+boston[:5]
+
+
 
 mtcars = dataset("datasets", "mtcars");
 mtcars
@@ -39,7 +43,17 @@ head(train, 10)
 
 
 
-formula = @formula(Perf~CycT+MMin+MMax+Cach+ChMin+ChMax)
+n = size(Chem97)
+df = Chem97[shuffle(1:n),:]
+pTrain = 0.29
+lastTindex = Int(floor(n*(1-pTrain)))
+numTest = n - lastTindex
+train = df[1:lastTindex,:]
+test = df[lastTindex+1:n,:]
+
+
+
+formula = @formula(GCSEScore~Gender+Age+School+Lea)
 model2 = glm(formula, train, Poisson(), LogLink())
 model3 = glm(formula, train, Gamma(),  InverseLink())
 
