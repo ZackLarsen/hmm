@@ -43,7 +43,7 @@ def integer_map(obs):
     :return: Dictionary mapping each observation to a unique integer
     '''
     unique_obs_list = set(obs)
-    unique_obs_list.sort(kind='quicksort')
+    #unique_obs_list.sort(kind='quicksort')
     integer_map = {token: value for token, value in zip(unique_obs_list, range(0,len(unique_obs_list)))}
     return integer_map
 
@@ -166,19 +166,18 @@ def create_pi(start_tag, emissions_matrix, token_map):
     return Pi
 
 
-@jit(nopython=True)
-def jit_viterbi(observations, states, transitions_matrix, emissions_matrix, Pi):
-    '''
+def viterbi(observations, transitions_matrix, emissions_matrix, Pi):
+    """
     Compute the optimal sequence of hidden states
+    Note that -inf (or np.NINF) for negative infinity is being used as a default
+    value to represent zero probabilities because we are computing in log10 space
 
-    :param observations: List of tokens in sequence
-    :param states: List of tags in sequence
-    :param transitions_matrix: Matrix of probability of tag given previous tag
-    :param emissions_matrix: Matrix of probability of tag given token
-    :param Pi: Initial probability vector
-
-    :return: bestpath, bestpathprob
-    '''
+    :param observations:
+    :param transitions_matrix:
+    :param emissions_matrix:
+    :param Pi:
+    :return:
+    """
 
     # Initialization
     N = emissions_matrix.shape[0] # Number of states (hidden states)
@@ -213,18 +212,19 @@ def jit_viterbi(observations, states, transitions_matrix, emissions_matrix, Pi):
     return bestpathprob, viterbi_hidden_states
 
 
-def viterbi(observations, transitions_matrix, emissions_matrix, Pi):
-    """
+@jit(nopython=True)
+def jit_viterbi(observations, states, transitions_matrix, emissions_matrix, Pi):
+    '''
     Compute the optimal sequence of hidden states
-    Note that -inf (or np.NINF) for negative infinity is being used as a default
-    value to represent zero probabilities because we are computing in log10 space
 
-    :param observations:
-    :param transitions_matrix:
-    :param emissions_matrix:
-    :param Pi:
-    :return:
-    """
+    :param observations: List of tokens in sequence
+    :param states: List of tags in sequence
+    :param transitions_matrix: Matrix of probability of tag given previous tag
+    :param emissions_matrix: Matrix of probability of tag given token
+    :param Pi: Initial probability vector
+
+    :return: bestpath, bestpathprob
+    '''
 
     # Initialization
     N = emissions_matrix.shape[0] # Number of states (hidden states)

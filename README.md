@@ -1,6 +1,17 @@
 # Hidden Markov Models (HMM)
 
 
+### Preprocessing workflow:
+  * Transform the raw data to a series of lists (or generators) of observations, states, and (observation, state) pairs
+  * Split the (observation, state) tuples or pairs into train/test sets
+  * Create the observation_map and state_map using the integer_map() function
+  * Create the transition, emission, and Pi matrices.
+  * Transform the above matrices into log10 probabilities, then save as compressed numpy binary dumps
+
+### Model training and inference:
+  * Use the Viterbi.py script along with the transition, emission, and Pi matrices to generate the most likely sequence of hidden states. Print out the kappa score or accuracy for the test sequences.
+
+
 #### According to Dan Jurafsky and James Martin's book Speech and Language Processing https://web.stanford.edu/~jurafsky/slp3/8.pdf, a hidden markov model (HMM) is comprised of the following 5 components:
   * Q: a set of N **states**.
   * A: a **transition probability matrix**, with each element aij representing the probability of transitioning from state i to state j, subject to the constraint that the sum of these elements is 1 (forming a proper probability distribution)

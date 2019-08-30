@@ -76,10 +76,10 @@ from numba import jit
 import re, pprint, sys, datetime, os
 import sys
 import importlib
-from collections import defaultdict, Counter
-import nltk
-from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
-from nltk import corpus
+from collections import defaultdict, Counter, namedtuple
+#import nltk
+#from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
+#from nltk import corpus
 from scipy.sparse import csr_matrix
 from sklearn.metrics import cohen_kappa_score
 #import shelve
@@ -116,7 +116,7 @@ WSJ_train = os.path.join(homedir, 'data/WSJ-train.txt')
 WSJ_test = os.path.join(homedir, 'data/WSJ-test.txt')
 
 # From text file
-token_list, tag_list, token_tag_list = file_prep(WSJ_train,
+observation_list, state_list, observation_state_list = file_prep(WSJ_train,
                                                  nrows=150000,
                                                  lowercase=True)
 
@@ -138,22 +138,29 @@ token_tag_list = [tuple([token.lower(), tag]) for token, tag in WSJ] # Or, #toke
 
 
 
+observation_list
+state_list
+observation_state_list
 
-unique_tokens = np.unique(token_list)
-n_tokens = len(unique_tokens)
 
-unique_tags = np.unique(tag_list)
-n_tags = len(unique_tags)
 
-token_map = token_to_int(unique_tokens)
-token_map_reversed = reverse_token_map(token_map)
-integer_token_list = [token_map[token] for token in token_list]
 
-tag_map = token_to_int(unique_tags)
-tag_map_reversed = reverse_token_map(tag_map)
+
+unique_observations = set(observation_list)
+n_obs = len(unique_observations)
+
+unique_states = set(state_list)
+n_states = len(unique_states)
+
+observation_map = integer_map(unique_observations)
+observation_map_reversed = reverse_integer_map(observation_map)
+integer_observation_list = [observation_map[obs] for obs in observation_list]
+
+tag_map = integer_map(unique_tags)
+tag_map_reversed = reverse_integer_map(tag_map)
 integer_tag_list = [tag_map[tag] for tag in tag_list]
 
-integer_tuple_list = [tuple([a,b]) for a,b in zip(integer_token_list, integer_tag_list)]
+integer_tuple_list = [(a,b) for a,b in zip(integer_token_list, integer_tag_list)]
 
 unique_integer_tokens = list(np.unique(integer_token_list))
 unique_integer_tags = list(np.unique(integer_tag_list))
@@ -221,10 +228,11 @@ tag_count[tag_map['NNP']]
 
 
 
-
-
-
-
+test_sequence = namedtuple('test_sequence', 'mid kappa')
+p1 = test_sequence('12345', 0.998)
+p1
+p1.mid
+p1.kappa
 
 
 
