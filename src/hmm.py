@@ -212,6 +212,50 @@ def viterbi(observations, transitions_matrix, emissions_matrix, Pi):
     return bestpathprob, viterbi_hidden_states
 
 
+
+prep_tuple = namedtuple('prep_tuple', 'n_observations unique_integer_observations n_states unique_integer_states observation_map state_map state_counts observation_state_counts bigram_counts integer_tuple_list')
+
+def hmm_prep(observation_state_list):
+    """
+    Perform conditional probability calculations and integer mapping
+    :param observation_state_list: List of (observation, state) tuples
+    :return:
+    """
+    observation_list = [tup[0] for tup in observation_state_list]
+    state_list = [tup[1] for tup in observation_state_list]
+
+    unique_observations = set(observation_list)
+    n_observations = len(unique_observations)
+
+    unique_states = set(state_list)
+    n_states = len(unique_states)
+
+    observation_map = integer_map(list(unique_observations))
+    observation_map_reversed = reverse_integer_map(observation_map)
+    integer_observation_list = [observation_map[observation] for observation in observation_list]
+
+    state_map = integer_map(list(unique_states))
+    state_map_reversed = reverse_integer_map(state_map)
+    integer_state_list = [state_map[state] for state in state_list]
+
+    integer_tuple_list = [tuple([a,b]) for a,b in zip(integer_observation_list, integer_state_list)]
+
+    unique_integer_observations = list(np.unique(integer_observation_list))
+    unique_integer_states = list(np.unique(integer_state_list))
+
+    observation_counts = Counter(integer_observation_list)
+    state_counts = Counter(integer_state_list)
+    observation_state_counts = Counter(integer_tuple_list)
+
+    bigrams = find_ngrams(integer_state_list, 2)
+    bigram_counts = Counter(bigrams)
+    n_bigrams = len(bigram_counts.keys())
+
+    pt = prep_tuple(n_observations, unique_integer_observations, n_states, unique_integer_states, observation_map, state_map, state_counts, observation_state_counts, bigram_counts, integer_tuple_list)
+
+    return pt
+
+
 @jit(nopython=True)
 def jit_viterbi(observations, states, transitions_matrix, emissions_matrix, Pi):
     '''
