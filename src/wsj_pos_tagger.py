@@ -240,10 +240,40 @@ tag_count[tag_map['NNP']]
 
 
 
+prep_tuple = hmm_prep(observation_state_list)
+
+prep_tuple._asdict()
+prep_tuple._fields
+
+
+n_observations = prep_tuple.n_observations
+unique_integer_observations = prep_tuple.unique_integer_observations
+n_states = prep_tuple.n_states
+unique_integer_states = prep_tuple.unique_integer_states
+observation_map = prep_tuple.observation_map
+state_map = prep_tuple.state_map
+state_counts = prep_tuple.state_counts
+observation_state_counts = prep_tuple.observation_state_counts
+bigram_counts = prep_tuple.bigram_counts
+integer_tuple_list = prep_tuple.integer_tuple_list
+
+
+# Computing log probabilities first so we can avoid underflow:
+transitions_matrix_log = np.log10(transitions_matrix)
+emissions_matrix_log = np.log10(emissions_matrix)
+Pi_log = np.log10(Pi)
+
+np.savez_compressed('/data/log_matrices', transitions=transitions_matrix_log,
+                    emissions=emissions_matrix_log,
+                    Pi=Pi_log)
 
 
 
 
+log_matrices = np.load('/data/log_matrices.npz')
+log_matrices['transitions']
+log_matrices['emissions']
+log_matrices[Pi]
 
 
 test_sequence = namedtuple('test_sequence', 'mid kappa')
