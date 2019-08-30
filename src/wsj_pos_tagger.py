@@ -145,6 +145,21 @@ observation_state_list
 
 
 
+observation_state_gen = (tup for tup in observation_state_list)
+next(observation_state_gen)
+
+
+observation_gen = (tup[0] for tup in observation_state_list)
+state_gen = (tup[1] for tup in observation_state_list)
+
+
+
+
+
+observation_list = [tup[0] for tup in observation_state_list]
+state_list = [state_list = tup[1] for tup in observation_state_list]
+
+
 
 unique_observations = set(observation_list)
 n_obs = len(unique_observations)
@@ -156,20 +171,23 @@ observation_map = integer_map(unique_observations)
 observation_map_reversed = reverse_integer_map(observation_map)
 integer_observation_list = [observation_map[obs] for obs in observation_list]
 
-tag_map = integer_map(unique_tags)
-tag_map_reversed = reverse_integer_map(tag_map)
-integer_tag_list = [tag_map[tag] for tag in tag_list]
 
-integer_tuple_list = [(a,b) for a,b in zip(integer_token_list, integer_tag_list)]
 
-unique_integer_tokens = list(np.unique(integer_token_list))
-unique_integer_tags = list(np.unique(integer_tag_list))
 
-token_counts = Counter(integer_token_list)
-tag_counts = Counter(integer_tag_list)
-token_tag_counts = Counter(integer_tuple_list)
+state_map = integer_map(unique_states)
+state_map_reversed = reverse_integer_map(state_map)
+integer_state_list = [state_map[state] for state in state_list]
 
-bigrams = find_ngrams(integer_tag_list, 2)
+integer_tuple_list = [(a,b) for a,b in zip(integer_observation_list, integer_state_list)]
+
+unique_integer_observations = list(set(integer_observation_list))
+unique_integer_states = list(set(integer_state_list))
+
+observation_counts = Counter(integer_observation_list)
+state_counts = Counter(integer_state_list)
+observation_state_counts = Counter(integer_tuple_list)
+
+bigrams = find_ngrams(integer_state_list, 2)
 bigram_counts = Counter(bigrams)
 n_bigrams = len(bigram_counts.keys())
 
@@ -233,7 +251,7 @@ p1 = test_sequence('12345', 0.998)
 p1
 p1.mid
 p1.kappa
-
+p1._asdict()
 
 
 
