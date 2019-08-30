@@ -81,27 +81,21 @@ import nltk
 from nltk import bigrams, trigrams, word_tokenize, sent_tokenize
 from nltk import corpus
 from scipy.sparse import csr_matrix
+from sklearn.metrics import cohen_kappa_score
 #import shelve
 
 
 
 
 
-
-sys.path
-
 # Windows:
 sys.path.append('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\src')
 
 # Mac OS X:
+homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
 sys.path.append(os.path.join(homedir, 'src/'))
 
-
-
-
-import hmm
 from hmm import *
-
 importlib.reload(hmm)
 
 
@@ -123,7 +117,7 @@ WSJ_test = os.path.join(homedir, 'data/WSJ-test.txt')
 
 # From text file
 token_list, tag_list, token_tag_list = file_prep(WSJ_train,
-                                                 nrows=4000,
+                                                 nrows=150000,
                                                  lowercase=True)
 
 

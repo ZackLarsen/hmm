@@ -36,26 +36,26 @@ def find_ngrams(input_list, n):
     return zip(*[input_list[i:] for i in range(n)])
 
 
-def token_to_int(tokens):
+def integer_map(obs):
     '''
     Take a list of tokens and map them to integers
-    :param token_list: List of tokens
-    :return: Dictionary mapping each token to a unique integer
+    :param obs: List of observations
+    :return: Dictionary mapping each observation to a unique integer
     '''
-    unique_token_list = np.unique(tokens)
-    unique_token_list.sort(kind='quicksort')
-    token_map = {token: value for token, value in zip(unique_token_list, range(0,len(unique_token_list)))}
-    return token_map
+    unique_obs_list = set(obs)
+    unique_obs_list.sort(kind='quicksort')
+    integer_map = {token: value for token, value in zip(unique_obs_list, range(0,len(unique_obs_list)))}
+    return integer_map
 
 
-def reverse_token_map(token_map):
+def reverse_integer_map(integer_map):
     '''
     Reverse the order of the dictionary for the tokens
-    :param token_map: The result of the token_to_int(tokens) function
-    :return: A reversed version of the token map dictionary
+    :param integer_map: The result of the integer_map(obs) function
+    :return: A reversed version of the observation map dictionary
     '''
-    reversed_dictionary = {value: key for key, value in token_map.items()}
-    return reversed_dictionary
+    reversed_integer_map = {value: key for key, value in integer_map.items()}
+    return reversed_integer_map
 
 
 def file_prep(filename, nrows = 100, lowercase = False):
