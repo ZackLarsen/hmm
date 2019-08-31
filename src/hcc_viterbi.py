@@ -1,20 +1,25 @@
 
-# Author: Zack Larsen
-# Date: August 31, 2019
-# Decode most likely sequence of hidden states
+"""
+Hidden Markov Model Project
+Decode most likely sequence of hidden states using viterbi decoding algorithm
+Author: Zack Larsen
+Date: August 31, 2019
+"""
+
+import os
+import sys
+from collections import namedtuple
 
 import numpy as np
 from numpy import NINF, inf
 import json
 import pickle
-from collections import namedtuple
-import os
-import sys
 from sklearn.metrics import cohen_kappa_score
 from tqdm import tqdm
 
-data_dir = '/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data'
-homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
+#data_dir = '/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data'
+#homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
+
 sys.path.append(os.path.join(homedir, 'src/'))
 from hmm import *
 
@@ -43,7 +48,7 @@ Pi_log = log_matrices['Pi']
 
 
 if __name__ == '__main__':
-    test_tuple = namedtuple('test_tuple', 'seq_id kappa')
+    test_tuple = namedtuple('test_tuple', 'seq_id kappa quad_kappa')
     results = []
 
     print("Decoding test sequences...")
@@ -51,8 +56,9 @@ if __name__ == '__main__':
         test_sequence = [tup[1] for tup in test_sequences if tup[0]==mid]
         hidden_states = [tup[2] for tup in test_sequences if tup[0]==mid]
         bestpathprob, viterbi_hidden_states = viterbi(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
-        kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states, )
-        results.append(test_tuple(mid, kappa_score))
+        kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states)
+        quad_kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states, weights='quadratic')
+        results.append(test_tuple(mid, kappa_score, quad_kappa_score))
 
     print("Results being saved to", os.path.join(data_dir, 'results.pickle'))
     with open(os.path.join(data_dir, 'results.pickle'), 'wb') as f:
@@ -62,3 +68,8 @@ if __name__ == '__main__':
     for tup in results:
         avg_kappas.append(tup.kappa)
     print("Average kappa score is:", np.mean(avg_kappas))
+
+    avg_quad_kappas = []
+    for tup in results:
+        avg_quad_kappas.append(tup.quad_kappa)
+    print("Average quadratic-weighted kappa score is:", np.mean(avg_quad_kappas))

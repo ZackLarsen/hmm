@@ -1,10 +1,18 @@
 
+"""
+Define utility functions for Hidden Markov Model (HMM) training and decoding
+Author: Zack Larsen
+Date: August 31, 2019
+"""
+
+import math
+import sys
+import os
+from collections import Counter, namedtuple
+
 import numpy as np
 from numba import jit
-import math
-import re, sys, datetime, os
-from collections import defaultdict, Counter, namedtuple
-from scipy.sparse import csr_matrix
+
 
 def unigram(tag_list):
     '''
