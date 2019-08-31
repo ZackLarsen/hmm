@@ -3,7 +3,7 @@ import numpy as np
 from numba import jit
 import math
 import re, sys, datetime, os
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, namedtuple
 from scipy.sparse import csr_matrix
 
 def unigram(tag_list):
@@ -210,7 +210,6 @@ def viterbi(observations, transitions_matrix, emissions_matrix, Pi):
     viterbi_hidden_states = np.append(viterbi_hidden_states, bestpathpointer) # Add the bestpathpointer to the last entry
 
     return bestpathprob, viterbi_hidden_states
-
 
 
 prep_tuple = namedtuple('prep_tuple', 'n_observations unique_integer_observations n_states unique_integer_states observation_map state_map state_counts observation_state_counts bigram_counts integer_tuple_list')

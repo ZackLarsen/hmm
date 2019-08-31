@@ -70,11 +70,11 @@ n_bigrams
 n_unique_bigrams
 '''
 
+#import pandas as pd
 import numpy as np
 import numba
 from numba import jit
 import re, pprint, sys, datetime, os
-import sys
 import importlib
 from collections import defaultdict, Counter, namedtuple
 #import nltk
@@ -83,31 +83,27 @@ from collections import defaultdict, Counter, namedtuple
 from scipy.sparse import csr_matrix
 from sklearn.metrics import cohen_kappa_score
 #import shelve
-
-
+import json
 
 
 
 # Windows:
-sys.path.append('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\src')
+#sys.path.append('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\src')
 
 # Mac OS X:
 homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
 sys.path.append(os.path.join(homedir, 'src/'))
 
 from hmm import *
-importlib.reload(hmm)
-
-
-
+#importlib.reload(hmm)
 
 
 
 
 # POS tag file from text file:
 # Windows:
-homedir = os.path.dirname('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\')
-WSJ_head = os.path.join(homedir, 'data\\WSJ_head.txt')
+#homedir = os.path.dirname('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\')
+#WSJ_head = os.path.join(homedir, 'data\\WSJ_head.txt')
 
 # Mac OS X:
 homedir = os.path.dirname('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/')
@@ -121,28 +117,9 @@ observation_list, state_list, observation_state_list = file_prep(WSJ_train,
                                                  lowercase=True)
 
 
-
-
-# POS tag file from nltk.corpus:
-#nltk.download('treebank')
-#nltk.download('universal_tagset')
-WSJ = corpus.treebank.tagged_words(tagset='universal')
-
-# From nltk corpus
-token_list = [token[0].lower() for token in WSJ]
-tag_list = [tag[1] for tag in WSJ]
-token_tag_list = [tuple([token.lower(), tag]) for token, tag in WSJ] # Or, #token_tag_list = WSJ
-
-
-
-
-
-
 observation_list
 state_list
 observation_state_list
-
-
 
 
 observation_state_gen = (tup for tup in observation_state_list)
@@ -153,98 +130,20 @@ observation_gen = (tup[0] for tup in observation_state_list)
 state_gen = (tup[1] for tup in observation_state_list)
 
 
-
-
-
 observation_list = [tup[0] for tup in observation_state_list]
-state_list = [state_list = tup[1] for tup in observation_state_list]
-
-
-
-unique_observations = set(observation_list)
-n_obs = len(unique_observations)
-
-unique_states = set(state_list)
-n_states = len(unique_states)
-
-observation_map = integer_map(unique_observations)
-observation_map_reversed = reverse_integer_map(observation_map)
-integer_observation_list = [observation_map[obs] for obs in observation_list]
+state_list = [tup[1] for tup in observation_state_list]
 
 
 
 
-state_map = integer_map(unique_states)
-state_map_reversed = reverse_integer_map(state_map)
-integer_state_list = [state_map[state] for state in state_list]
-
-integer_tuple_list = [(a,b) for a,b in zip(integer_observation_list, integer_state_list)]
-
-unique_integer_observations = list(set(integer_observation_list))
-unique_integer_states = list(set(integer_state_list))
-
-observation_counts = Counter(integer_observation_list)
-state_counts = Counter(integer_state_list)
-observation_state_counts = Counter(integer_tuple_list)
-
-bigrams = find_ngrams(integer_state_list, 2)
-bigram_counts = Counter(bigrams)
-n_bigrams = len(bigram_counts.keys())
-
-
-
-
-
-
-transitions_matrix = create_transitions(unique_integer_tags, bigram_counts,
-                                       tag_counts, n_tags)
-
-emissions_matrix = create_emissions(unique_integer_tokens, unique_integer_tags,
-                                    token_tag_counts, tag_counts, n_tokens,
-                                    n_tags)
-
-Pi = create_pi('<START>', emissions_matrix, token_map)
-
-
-
-emissions_matrix[tag_map['<START>'],:].sum()
-emissions_matrix[:,token_map['<START>']].sum()
-
-
-
-
-transition_matrix.shape # 42, 42
-emissions_matrix.shape # 42, 1248
-Pi.shape # 42,
-
-
-
-
-tag_map['<START>']
-
-
-
-
-
-
-nouns = {key: value for key, value in token_tag_counts.items() if key[1] == tag_map['NNP']}
-nouns
-
-nouns.keys()
-nouns.values()
-
-sum(nouns.values())
-tag_count[tag_map['NNP']]
 
 
 
 
 
 prep_tuple = hmm_prep(observation_state_list)
-
-prep_tuple._asdict()
-prep_tuple._fields
-
+#prep_tuple._asdict()
+#prep_tuple._fields
 
 n_observations = prep_tuple.n_observations
 unique_integer_observations = prep_tuple.unique_integer_observations
@@ -258,22 +157,70 @@ bigram_counts = prep_tuple.bigram_counts
 integer_tuple_list = prep_tuple.integer_tuple_list
 
 
+
+# Save integer maps
+with open('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data/observation_map.json', 'w') as fp:
+    json.dump(observation_map, fp)
+
+with open('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data/state_map.json', 'w') as fp:
+    json.dump(state_map, fp)
+
+
+
+
+
+transitions_matrix = create_transitions(unique_integer_states, bigram_counts,
+                                       state_counts, n_states)
+
+emissions_matrix = create_emissions(unique_integer_observations, unique_integer_states,
+                                    observation_state_counts, state_counts, n_observations,
+                                    n_states)
+
+Pi = create_pi('<START>', emissions_matrix, observation_map)
+
+
+emissions_matrix[state_map['<START>'],:].sum()
+emissions_matrix[:,observation_map['<START>']].sum()
+
+transitions_matrix.shape
+emissions_matrix.shape
+Pi.shape
+
+state_map['<START>']
+
+
+
+
+
+
+
 # Computing log probabilities first so we can avoid underflow:
 transitions_matrix_log = np.log10(transitions_matrix)
 emissions_matrix_log = np.log10(emissions_matrix)
 Pi_log = np.log10(Pi)
 
-np.savez_compressed('/data/log_matrices', transitions=transitions_matrix_log,
+# Save the matrices as a zipped archive of numpy arrays:
+np.savez_compressed('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data/log_matrices',
+                    transitions=transitions_matrix_log,
                     emissions=emissions_matrix_log,
                     Pi=Pi_log)
 
 
 
 
-log_matrices = np.load('/data/log_matrices.npz')
-log_matrices['transitions']
-log_matrices['emissions']
-log_matrices[Pi]
+
+
+
+
+
+# Prepare the test sequences to feed to the decoder program:
+test_sequences = []
+for word in test_sentence:
+    if word.lower() in token_map.keys():
+        observations.append(token_map[word.lower()])
+    else:
+        observations.append('<UNK>')
+
 
 
 test_sequence = namedtuple('test_sequence', 'mid kappa')
@@ -282,6 +229,15 @@ p1
 p1.mid
 p1.kappa
 p1._asdict()
+
+
+
+
+
+
+
+
+
 
 
 
@@ -322,59 +278,31 @@ correct_hidden_states = ['NNP','NNP',',','CD','NNS','JJ',',','VBN','IN','NN','IN
 
 
 
-# Convert observations to integers. If token is not a key in token_map dictionary,
-# use the <UNK> token for 'unknown':
-observations = []
-for word in test_sentence:
-    if word.lower() in token_map.keys():
-        observations.append(token_map[word.lower()])
-    else:
-        observations.append('<UNK>')
-
-observations
-
-
-
-
-
-# Decode the test sentence:
-viterbi_trellis, backpointer = viterbi_part1(observations, transitions_matrix, emissions_matrix, Pi)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Compute the accuracy of the viterbi decoder on the test set:
-# Here, accuracy is defined as the number of tags correctly identified
-# divided by the total number of tags produced in the decoding process for the test set.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Extras
 
 '''
+
+# POS tag file from nltk.corpus:
+#nltk.download('treebank')
+#nltk.download('universal_tagset')
+# WSJ = corpus.treebank.tagged_words(tagset='universal')
+
+# From nltk corpus
+# token_list = [token[0].lower() for token in WSJ]
+# tag_list = [tag[1] for tag in WSJ]
+# token_tag_list = [tuple([token.lower(), tag]) for token, tag in WSJ] # Or, #token_tag_list = WSJ
+
+
+
+nouns = {key: value for key, value in token_tag_counts.items() if key[1] == tag_map['NNP']}
+nouns
+
+nouns.keys()
+nouns.values()
+
+sum(nouns.values())
+tag_count[tag_map['NNP']]
+
 
 #tag_counts, tag_model = unigram(integer_tag_list)
 
