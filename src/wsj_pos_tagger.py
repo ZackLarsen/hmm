@@ -84,6 +84,7 @@ from scipy.sparse import csr_matrix
 from sklearn.metrics import cohen_kappa_score
 #import shelve
 import json
+import pickle
 
 
 
@@ -116,26 +117,16 @@ observation_list, state_list, observation_state_list = file_prep(WSJ_train,
                                                  nrows=150000,
                                                  lowercase=True)
 
-
 observation_list
 state_list
 observation_state_list
-
 observation_state_list[-10:]
-
-
-
-
-
-
-
 
 
 observation_state_list = []
 sentence_count = 1
 nrows = 220663
 lowercase = True
-
 
 with open(WSJ_train) as infile:
     head = [next(infile) for x in range(nrows)]
@@ -156,12 +147,11 @@ with open(WSJ_train) as infile:
             observation_state_list.append((sentence_count, '<START>', '<START>'))
     observation_state_list.append((sentence_count, '<STOP>', '<STOP>'))
 
-observation_state_list
-observation_state_list[-25:]
+#observation_state_list
+#observation_state_list[-25:]
 
 
-
-len(set([tup[0] for tup in observation_state_list]))
+#len(set([tup[0] for tup in observation_state_list]))
 # 8,937 sentences in total. Last one is junk so get rid of it:
 observation_state_list = [tup for tup in observation_state_list if tup[0]!=8937]
 observation_state_list
@@ -173,23 +163,16 @@ num_sequences = len(set([tup[0] for tup in observation_state_list]))
 train = [tup for tup in observation_state_list if tup[0]<=round(0.7*num_sequences)]
 test = [tup for tup in observation_state_list if tup[0]>round(0.7*num_sequences)]
 
-
-train_gen = (tup for tup in train)
-next(train_gen)
-
-
-
+#train_gen = (tup for tup in train)
+#next(train_gen)
 
 
 
 # Close the vocabulary so anything with a low occurrence frequency gets the
 # out-of-vocabulary state:
-'<OOV>'
 
 observations = [tup[1] for tup in train]
 states = [tup[2] for tup in train]
-
-
 
 Counter([tup[1] for tup in train])
 Counter([tup[2] for tup in train])
@@ -221,14 +204,6 @@ oov_train
 
 
 
-
-
-
-
-
-
-
-
 prep_tuple = hmm_prep(oov_train)
 #prep_tuple._asdict()
 #prep_tuple._fields
@@ -255,8 +230,6 @@ with open('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data/state_m
 
 
 
-
-
 transitions_matrix = create_transitions(unique_integer_states, bigram_counts,
                                        state_counts, n_states)
 
@@ -277,10 +250,6 @@ Pi = create_pi('<START>', emissions_matrix, observation_map)
 
 
 
-
-
-
-
 # Computing log probabilities first so we can avoid underflow:
 transitions_matrix_log = np.log10(transitions_matrix)
 emissions_matrix_log = np.log10(emissions_matrix)
@@ -295,64 +264,21 @@ np.savez_compressed('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/da
 
 
 
-
-
-
-
-
-
-
-test
-
-
-
-
 # Prepare the test sequences to feed to the decoder program:
-test_sequences = []
+oov_test = []
 for tup in test:
     if tup[1] in observation_map.keys():
-        test_sequences.append((tup[0], observation_map[tup[1]], state_map[tup[2]]))
+        oov_test.append((tup[0], observation_map[tup[1]], state_map[tup[2]]))
     else:
-        test_sequences.append((tup[0], observation_map['<OOV>'], state_map['<OOV>']))
+        oov_test.append((tup[0], observation_map['<OOV>'], state_map['<OOV>']))
 
-
-test_sequences
-
-
+oov_test
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-test_sequence = namedtuple('test_sequence', 'seq_id kappa')
-p1 = test_sequence('6298', 0.998)
-p1
-p1.seq_id
-p1.kappa
-p1._asdict()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Save as pickled list of tuples:
+with open(os.path.join(data_dir, 'test_tuples.pickle'), 'wb') as f:
+    pickle.dump(oov_test, f)
 
 
 
