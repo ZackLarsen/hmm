@@ -84,10 +84,10 @@ def file_prep(filename, nrows = 100, lowercase = False):
                 pos = chars[1]
                 if lowercase:
                     token_list.append(token.lower())
-                    token_pos_list.append(tuple((token.lower(), pos)))
+                    token_pos_list.append((token.lower(), pos))
                 elif not lowercase:
                     token_list.append(token)
-                    token_pos_list.append(tuple((token, pos)))
+                    token_pos_list.append((token, pos))
                 pos_list.append(pos)
             elif len(chars) != 3:
                 sentences += 1
@@ -95,11 +95,11 @@ def file_prep(filename, nrows = 100, lowercase = False):
                 token_list.append('<START>')
                 pos_list.append('<STOP>')
                 pos_list.append('<START>')
-                token_pos_list.append(tuple(('<STOP>', '<STOP>')))
-                token_pos_list.append(tuple(('<START>', '<START>')))
+                token_pos_list.append(('<STOP>', '<STOP>'))
+                token_pos_list.append(('<START>', '<START>'))
         token_list.append('<STOP>')
         pos_list.append('<STOP>')
-        token_pos_list.append(tuple(('<STOP>', '<STOP>')))
+        token_pos_list.append(('<STOP>', '<STOP>'))
     print(sentences, "sentences read in.")
     return token_list, pos_list, token_pos_list
 
@@ -152,7 +152,7 @@ def create_emissions(tokens, tags, tuple_counts, tag_counts, n_tokens, n_tags):
     return emissions_matrix
 
 
-def create_pi(start_tag, emissions_matrix, token_map):
+def create_pi(start_state, emissions_matrix, observation_map):
     """
     Create the initial probability distribution Pi, representing the
      probability of the HMM starting in state i
@@ -160,7 +160,7 @@ def create_pi(start_tag, emissions_matrix, token_map):
     :param emissions_matrix: The matrix of probabilities of tokens given a tag
     :return: Pi, the initial probability distribution
     """
-    start_index = token_map[start_tag]
+    start_index = observation_map[start_state]
     Pi = emissions_matrix[:, start_index]
     assert Pi.sum() == 1, "Does not form a valid probability distribution."
     return Pi
@@ -220,8 +220,8 @@ def hmm_prep(observation_state_list):
     :param observation_state_list: List of (observation, state) tuples
     :return:
     """
-    observation_list = [tup[0] for tup in observation_state_list]
-    state_list = [tup[1] for tup in observation_state_list]
+    observation_list = [tup[1] for tup in observation_state_list]
+    state_list = [tup[2] for tup in observation_state_list]
 
     unique_observations = set(observation_list)
     n_observations = len(unique_observations)

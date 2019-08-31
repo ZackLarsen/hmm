@@ -121,17 +121,7 @@ observation_list
 state_list
 observation_state_list
 
-
-observation_state_gen = (tup for tup in observation_state_list)
-next(observation_state_gen)
-
-
-observation_gen = (tup[0] for tup in observation_state_list)
-state_gen = (tup[1] for tup in observation_state_list)
-
-
-observation_list = [tup[0] for tup in observation_state_list]
-state_list = [tup[1] for tup in observation_state_list]
+observation_state_list[-10:]
 
 
 
@@ -141,7 +131,105 @@ state_list = [tup[1] for tup in observation_state_list]
 
 
 
-prep_tuple = hmm_prep(observation_state_list)
+observation_state_list = []
+sentence_count = 1
+nrows = 220663
+lowercase = True
+
+
+with open(WSJ_train) as infile:
+    head = [next(infile) for x in range(nrows)]
+    observation_state_list.append((sentence_count, '<START>', '<START>'))
+    for line in head:
+        line = line.strip('\n')
+        chars = line.split(' ')
+        if len(chars) == 3:
+            observation = chars[0]
+            state = chars[1]
+            if lowercase:
+                observation_state_list.append((sentence_count, observation.lower(), state))
+            elif not lowercase:
+                observation_state_list.append((sentence_count, observation, state))
+        elif len(chars) != 3:
+            observation_state_list.append((sentence_count, '<STOP>', '<STOP>'))
+            sentence_count += 1
+            observation_state_list.append((sentence_count, '<START>', '<START>'))
+    observation_state_list.append((sentence_count, '<STOP>', '<STOP>'))
+
+observation_state_list
+observation_state_list[-25:]
+
+
+
+len(set([tup[0] for tup in observation_state_list]))
+# 8,937 sentences in total. Last one is junk so get rid of it:
+observation_state_list = [tup for tup in observation_state_list if tup[0]!=8937]
+observation_state_list
+observation_state_list[-25:]
+num_sequences = len(set([tup[0] for tup in observation_state_list]))
+
+
+# Split into train/test (6255 is about 70% of all sentences):
+train = [tup for tup in observation_state_list if tup[0]<=round(0.7*num_sequences)]
+test = [tup for tup in observation_state_list if tup[0]>round(0.7*num_sequences)]
+
+
+train_gen = (tup for tup in train)
+next(train_gen)
+
+
+
+
+
+
+# Close the vocabulary so anything with a low occurrence frequency gets the
+# out-of-vocabulary state:
+'<OOV>'
+
+observations = [tup[1] for tup in train]
+states = [tup[2] for tup in train]
+
+
+
+Counter([tup[1] for tup in train])
+Counter([tup[2] for tup in train])
+set(Counter([tup[1] for tup in train]).values())
+
+total_observations = sum(Counter([tup[1] for tup in train]).values())
+total_observations
+
+# Get the percent of the vocabulary that each observation represents:
+obs_dict = {k: (v/total_observations) for k,v in Counter([tup[1] for tup in train]).items()}
+obs_dict
+
+# Common observations:
+common_obs = {k:v for k,v in obs_dict.items() if v >= 0.0001}.keys()
+
+# Rare observations:
+rare_obs = {k:v for k,v in obs_dict.items() if v <= 0.0001}.keys()
+
+# Replace rare observations with the out-of-vocabulary observation:
+oov_train = []
+for tup in train:
+    if tup[1] in rare_obs:
+        oov_train.append((tup[0], '<OOV>', '<OOV>'))
+    else:
+        oov_train.append(tup)
+
+oov_train
+
+
+
+
+
+
+
+
+
+
+
+
+prep_tuple = hmm_prep(oov_train)
 #prep_tuple._asdict()
 #prep_tuple._fields
 
@@ -176,17 +264,16 @@ emissions_matrix = create_emissions(unique_integer_observations, unique_integer_
                                     observation_state_counts, state_counts, n_observations,
                                     n_states)
 
+#observation_map['<START>'] # 4618
 Pi = create_pi('<START>', emissions_matrix, observation_map)
+# Assert that all start probabilities sum to 1:
+#emissions_matrix[state_map['<START>'],:].sum()
+#emissions_matrix[:,observation_map['<START>']].sum()
 
+#transitions_matrix.shape
+#emissions_matrix.shape
+#Pi.shape
 
-emissions_matrix[state_map['<START>'],:].sum()
-emissions_matrix[:,observation_map['<START>']].sum()
-
-transitions_matrix.shape
-emissions_matrix.shape
-Pi.shape
-
-state_map['<START>']
 
 
 
@@ -213,20 +300,43 @@ np.savez_compressed('/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/da
 
 
 
+
+
+test
+
+
+
+
 # Prepare the test sequences to feed to the decoder program:
 test_sequences = []
-for word in test_sentence:
-    if word.lower() in token_map.keys():
-        observations.append(token_map[word.lower()])
+for tup in test:
+    if tup[1] in observation_map.keys():
+        test_sequences.append((tup[0], observation_map[tup[1]], state_map[tup[2]]))
     else:
-        observations.append('<UNK>')
+        test_sequences.append((tup[0], observation_map['<OOV>'], state_map['<OOV>']))
+
+
+test_sequences
 
 
 
-test_sequence = namedtuple('test_sequence', 'mid kappa')
-p1 = test_sequence('12345', 0.998)
+
+
+
+
+
+
+
+
+
+
+
+
+
+test_sequence = namedtuple('test_sequence', 'seq_id kappa')
+p1 = test_sequence('6298', 0.998)
 p1
-p1.mid
+p1.seq_id
 p1.kappa
 p1._asdict()
 
@@ -245,8 +355,16 @@ p1._asdict()
 
 
 
-# Example WSJ sentence from test set to tag:
+
+
+# Extras
+
 '''
+
+
+
+# Example WSJ sentence from test set to tag:
+
 Mr. NNP
 Carlucci NNP
 , ,
@@ -263,7 +381,7 @@ the DT
 Reagan NNP
 administration NN
 . .
-'''
+
 
 test_sentence = ['Mr.','Carlucci','','59','years','old','','served','as','defense','secretary','in','the','Reagan','administration','.']
 test_sentence
@@ -278,9 +396,6 @@ correct_hidden_states = ['NNP','NNP',',','CD','NNS','JJ',',','VBN','IN','NN','IN
 
 
 
-# Extras
-
-'''
 
 # POS tag file from nltk.corpus:
 #nltk.download('treebank')
