@@ -282,6 +282,42 @@ with open(os.path.join(data_dir, 'test_tuples.pickle'), 'wb') as f:
 
 
 
+# At this point, we can run python viterbi.py to decode the test sequences
+
+
+
+
+
+
+
+
+
+
+
+# Once we have run python viterbi.py to decode the test sequences, we can look at
+# the results:
+# First, we have to re-define the test_tuple namedTuple to be able to open the contents:
+test_tuple = namedtuple('test_tuple', 'seq_id kappa quad_kappa')
+with open(os.path.join(data_dir, 'results.pickle'), 'rb') as f:
+    results = pickle.load(f)
+
+results
+
+
+failed_sequences = [tt for tt in results if tt.kappa <1]
+failed_sequences
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Extras
 
