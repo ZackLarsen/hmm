@@ -166,6 +166,50 @@ def create_pi(start_state, emissions_matrix, observation_map):
     return Pi
 
 
+def hmm_prep(observation_state_list):
+    """
+    Perform conditional probability calculations and integer mapping
+    :param observation_state_list: List of (observation, state) tuples
+    :return:
+    """
+    prep_tuple = namedtuple('prep_tuple',
+                            'n_observations unique_integer_observations n_states unique_integer_states observation_map state_map state_counts observation_state_counts bigram_counts integer_tuple_list')
+
+    observation_list = [tup[1] for tup in observation_state_list]
+    state_list = [tup[2] for tup in observation_state_list]
+
+    unique_observations = set(observation_list)
+    n_observations = len(unique_observations)
+
+    unique_states = set(state_list)
+    n_states = len(unique_states)
+
+    observation_map = integer_map(list(unique_observations))
+    observation_map_reversed = reverse_integer_map(observation_map)
+    integer_observation_list = [observation_map[observation] for observation in observation_list]
+
+    state_map = integer_map(list(unique_states))
+    state_map_reversed = reverse_integer_map(state_map)
+    integer_state_list = [state_map[state] for state in state_list]
+
+    integer_tuple_list = [tuple([a,b]) for a,b in zip(integer_observation_list, integer_state_list)]
+
+    unique_integer_observations = list(np.unique(integer_observation_list))
+    unique_integer_states = list(np.unique(integer_state_list))
+
+    observation_counts = Counter(integer_observation_list)
+    state_counts = Counter(integer_state_list)
+    observation_state_counts = Counter(integer_tuple_list)
+
+    bigrams = find_ngrams(integer_state_list, 2)
+    bigram_counts = Counter(bigrams)
+    n_bigrams = len(bigram_counts.keys())
+
+    pt = prep_tuple(n_observations, unique_integer_observations, n_states, unique_integer_states, observation_map, state_map, state_counts, observation_state_counts, bigram_counts, integer_tuple_list)
+
+    return pt
+
+
 def viterbi(observations, transitions_matrix, emissions_matrix, Pi):
     """
     Compute the optimal sequence of hidden states
@@ -212,52 +256,8 @@ def viterbi(observations, transitions_matrix, emissions_matrix, Pi):
     return bestpathprob, viterbi_hidden_states
 
 
-def hmm_prep(observation_state_list):
-    """
-    Perform conditional probability calculations and integer mapping
-    :param observation_state_list: List of (observation, state) tuples
-    :return:
-    """
-    prep_tuple = namedtuple('prep_tuple',
-                            'n_observations unique_integer_observations n_states unique_integer_states observation_map state_map state_counts observation_state_counts bigram_counts integer_tuple_list')
-
-    observation_list = [tup[1] for tup in observation_state_list]
-    state_list = [tup[2] for tup in observation_state_list]
-
-    unique_observations = set(observation_list)
-    n_observations = len(unique_observations)
-
-    unique_states = set(state_list)
-    n_states = len(unique_states)
-
-    observation_map = integer_map(list(unique_observations))
-    observation_map_reversed = reverse_integer_map(observation_map)
-    integer_observation_list = [observation_map[observation] for observation in observation_list]
-
-    state_map = integer_map(list(unique_states))
-    state_map_reversed = reverse_integer_map(state_map)
-    integer_state_list = [state_map[state] for state in state_list]
-
-    integer_tuple_list = [tuple([a,b]) for a,b in zip(integer_observation_list, integer_state_list)]
-
-    unique_integer_observations = list(np.unique(integer_observation_list))
-    unique_integer_states = list(np.unique(integer_state_list))
-
-    observation_counts = Counter(integer_observation_list)
-    state_counts = Counter(integer_state_list)
-    observation_state_counts = Counter(integer_tuple_list)
-
-    bigrams = find_ngrams(integer_state_list, 2)
-    bigram_counts = Counter(bigrams)
-    n_bigrams = len(bigram_counts.keys())
-
-    pt = prep_tuple(n_observations, unique_integer_observations, n_states, unique_integer_states, observation_map, state_map, state_counts, observation_state_counts, bigram_counts, integer_tuple_list)
-
-    return pt
-
-
 @jit(nopython=True)
-def jit_viterbi(observations, states, transitions_matrix, emissions_matrix, Pi):
+def viterbi_jit(observations, transitions_matrix, emissions_matrix, Pi):
     '''
     Compute the optimal sequence of hidden states
 
@@ -287,13 +287,20 @@ def jit_viterbi(observations, states, transitions_matrix, emissions_matrix, Pi):
                 priors[previous_state, 1] = viterbi_trellis[previous_state, time_step - 1] + \
                                             transitions_matrix[previous_state, current_state] + \
                                             emissions_matrix[current_state, observations[time_step]] # Previously, we were using timestep-1 here
-            viterbi_trellis[current_state, time_step] = np.amax(priors[:, 1], axis=0)
-            backpointer[current_state, time_step] = np.argmax(priors[:, 1], axis=0)
+            viterbi_trellis[current_state, time_step] = np.amax(priors[:, 1])
+            #viterbi_trellis[current_state, time_step] = max(priors[:, 1])
+            backpointer[current_state, time_step] = np.argmax(priors[:, 1])
+            #backpointer[current_state, time_step] = max(zip(priors[:, 1], range(len(priors[:, 1]))))[1]
 
     # Termination
     bestpathprob = np.amax(viterbi_trellis[:, -1])
     bestpathpointer = np.argmax(viterbi_trellis[:, -1])
-    viterbi_cell_idx = np.argmax(viterbi_trellis, axis=0)
+
+    #viterbi_cell_idx = np.argmax(viterbi_trellis)
+    viterbi_cell_idx = np.zeros_like(viterbi_trellis[0,:])
+    for i in range(0, viterbi_trellis.shape[0]+1):
+        viterbi_cell_idx[i] = np.argmax(viterbi_trellis[:,i])
+
     viterbi_hidden_states = []
     for i, ix in enumerate(viterbi_cell_idx):
         viterbi_hidden_states.append(backpointer[ix, i])

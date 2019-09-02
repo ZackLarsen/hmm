@@ -18,7 +18,6 @@ homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
 sys.path.append(os.path.join(homedir, 'src/'))
 from hmm import *
 
-
 # Handle the input sequences:
 with open(os.path.join(data_dir, 'test_tuples.pickle'), 'rb') as f:
     test_sequences = pickle.load(f)
@@ -46,10 +45,12 @@ if __name__ == '__main__':
     test_tuple = namedtuple('test_tuple', 'seq_id kappa quad_kappa')
     results = []
 
-    print("Decoding test sequences...")
+    print("Decoding test sequences ----->")
+    #for mid in tqdm(test_mids[:10]):
     for mid in tqdm(test_mids):
         test_sequence = [tup[1] for tup in test_sequences if tup[0]==mid]
         hidden_states = [tup[2] for tup in test_sequences if tup[0]==mid]
+
         bestpathprob, viterbi_hidden_states = viterbi(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
         kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states)
         quadratic_kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states, weights='quadratic')

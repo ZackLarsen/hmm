@@ -1,11 +1,10 @@
 
-# Project: Hidden Markov Models for pos tagging
-# Author: Zack Larsen
-# Date: July 20, 2019
-
-
-# Outline:
 '''
+
+Project: Hidden Markov Models for pos tagging
+Author: Zack Larsen
+Date: July 20, 2019
+
 Step 1:
     Read in the data from either a text file or nltk corpus
 Step 2:
@@ -48,28 +47,6 @@ Step 11:
 '''
 
 
-## Main data structures:
-'''
-tag_counts
-bigram_counts
-unique_pos
-start_pos
-transitions_matrix (n_unique_tags + 1, n_unique_tags)
-emissions_matrix (n_unique_tokens * n_unique_tags)
-viterbi_trellis (n_tags * n_tokens)
-'''
-
-
-## Main variables
-'''
-n_tokens
-n_unique_tokens
-n_tags
-n_unique_tags
-n_bigrams
-n_unique_bigrams
-'''
-
 #import pandas as pd
 import numpy as np
 import numba
@@ -92,6 +69,7 @@ import pickle
 #sys.path.append('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\src')
 
 # Mac OS X:
+data_dir = '/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data'
 homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
 sys.path.append(os.path.join(homedir, 'src/'))
 
@@ -309,6 +287,44 @@ failed_sequences
 
 
 
+
+
+
+
+
+
+
+from numpy import random
+np.random.random_sample((1,6))
+
+# Experimenting with max:
+priors = np.zeros((6,2))
+priors[:,0] = range(1,7)
+priors[:,1] = np.random.random_sample((1,6))
+priors
+
+np.argmax(priors[:,1])
+max(priors[:,1])
+max(priors[:,1], key=priors[:,0])
+
+
+
+
+max(zip(priors[:,1], range(len(priors[:,1]))))[1]
+
+
+
+
+priors
+
+
+@jit(nopython=True)
+def argmax_jit(priors):
+    return np.argmax(priors[:,1])
+
+
+
+argmax_jit(priors)
 
 
 
