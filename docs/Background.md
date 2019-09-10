@@ -2,7 +2,7 @@
 
 Go [home](https://zacklarsen.github.io/hmm/)
 
-#### According to Dan Jurafsky and James Martin's book Speech and Language Processing https://web.stanford.edu/~jurafsky/slp3/8.pdf, a hidden markov model (HMM) is comprised of the following 5 components:
+#### According to Dan Jurafsky and James Martin's book [Speech and Language Processing](https://web.stanford.edu/~jurafsky/slp3/8.pdf), a hidden markov model (HMM) is comprised of the following 5 components:
   * Q: a set of N **states**.
   * A: a **transition probability matrix**, with each element aij representing the probability of transitioning from state i to state j, subject to the constraint that the sum of these elements is 1 (forming a proper probability distribution)
   * O: a set of T **observations**, each one drawn from a vocabulary V.
