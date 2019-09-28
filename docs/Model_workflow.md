@@ -1,6 +1,10 @@
 ## Model Workflow
 
 
-1.
-1.
-1.
+1. Read in (Observation token, State tag) sequence data. This can be in the form of a dataframe, a list of tuples in Python, a named vector/named list in R, etc. The main idea is that we have two variable vectors of the same length, each made up of individual sequences.
+1. If the sequences do not explicitly contain <START> and <EOS> observation tokens/ state tags, insert them at the beginning and end of each sequence. This way, we will not be counting the occurrences of state transitions that occur across two sequences; we want to wnsure that the only (observation, observation) bigrams we observe happen within one distinct sequence.
+1. Split the sequence data into training set and validation or test set. This way, we can train the hidden markov model on the training data and test its performance in the test set.
+1. Define a threshold probability for out-of-vocabulary, or <OOV>, observation tokens. In other words, for any observations that occur rarely, we will treat them all as one observation and that observation will have the occurrence probability of the sum of the individual occurrence probabilities for all observations lower than the threshold that is set. In some cases, we may wish to treat this threshold as a hyperparameter to tune performance, or we may rely on a heuristic such as always using the top 95th percentile of observation frequencies as our vocabulary and any observations falling below that get treated as out-of-vocabulary.
+1. Create a transmissions probability matrix, representing the probability of transitioning from one state tag to the next. This matrix will have dimensions nXn, where n = number of state tags.
+1. Create an emissions probability matrix, representing the probability of a state tag given an observation token. This matrix will have dimensionality mXn, where m = number of observation tokens and n again represents number of state tags.
+1. Create an initial probabilities matrix, representing the probability of starting the sequence in a given state tag. This matrix will have dimensionality nX1, where n again represents number of state tags.
