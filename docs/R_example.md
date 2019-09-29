@@ -295,9 +295,12 @@ test_sequences %<>%
 # With the prepared test sequences, loop through them and add the kappa scores to a list:
 
 options(show.error.messages = FALSE)
-k <- max(test_sequences$seq_id)
+k <- 100
+#k <- max(test_sequences$seq_id)
+viterbi_hidden_states_list <- list(length = k)
 kappas <- list(length = k)
 successes <- 0
+#pb <- progress_bar$new(total = k)
 pb <- progress_bar$new(format = "[:bar] :current/:total (:percent)", total = k)
 for(i in 1:k){
   pb$tick()
@@ -307,12 +310,14 @@ for(i in 1:k){
     actual_observations <- sequences$token
     actual_hidden_states <-  sequences$tag
     viterbi_hidden_states <- HMM::viterbi(hmm, actual_observations)
+    viterbi_hidden_states_list[[i]] <- viterbi_hidden_states
     x <- data.frame(
       viterbi_hidden_states = viterbi_hidden_states,
       actual_hidden_states = actual_hidden_states
     )
     kappa <- psych::cohen.kappa(x, w=NULL, n.obs=NULL, alpha=.05, levels=NULL)
     kappas[[i]] <- kappa$weighted.kappa
+    #print(kappa$weighted.kappa)
     successes <- successes + 1
     }
     ,silent = TRUE
@@ -322,6 +327,13 @@ options(show.error.messages = TRUE)
 
 
 successes
+
+# Compare actual hidden states to the model's predictions:
+viterbi_hidden_states_list[[1]]
+test_sequences %>% 
+  filter(seq_id == 1) %>% 
+  select(tag)
+
 
 kappas
 avg_kappa <- mean(unlist(kappas))
