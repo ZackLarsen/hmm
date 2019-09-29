@@ -317,7 +317,6 @@ for(i in 1:k){
     )
     kappa <- psych::cohen.kappa(x, w=NULL, n.obs=NULL, alpha=.05, levels=NULL)
     kappas[[i]] <- kappa$weighted.kappa
-    #print(kappa$weighted.kappa)
     successes <- successes + 1
     }
     ,silent = TRUE
