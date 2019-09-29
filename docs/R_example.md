@@ -120,34 +120,6 @@ simHMM(hmm, 4)
 
 ```r
 
-> wsj_test_closed
-           token     tag
-    1:   <START> <START>
-    2:      most     JJS
-    3:   banking      NN
-    4:    issues     NNS
-    5:     <OOV>   <OOV>
-   ---                  
-69813:       san     NNP
-69814: francisco     NNP
-69815:   instead      RB
-69816:         .       .
-69817:     <EOS>   <EOS>
-> wsj_test_closed
-           token     tag
-    1:   <START> <START>
-    2:      most     JJS
-    3:   banking      NN
-    4:    issues     NNS
-    5:     <OOV>   <OOV>
-   ---                  
-69813:       san     NNP
-69814: francisco     NNP
-69815:   instead      RB
-69816:         .       .
-69817:     <EOS>   <EOS>
-> wsj_test_closed %>% 
-+   head(50)
          token     tag
  1:    <START> <START>
  2:       most     JJS
@@ -182,6 +154,7 @@ simHMM(hmm, 4)
 
 ```
 
+#### Start by reading in preprocessed CSV files:
 
 ```r
 
