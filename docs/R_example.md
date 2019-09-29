@@ -8,8 +8,7 @@ library(pacman)
 library(tidyverse)
 library(magrittr)
 
-p_load(HMM, TraMineR, seqHMM, data.table, here, DataCombine,
-       esquisse, ggthemr, hrbrthemes, reticulate, ggthemes)
+p_load(HMM, TraMineR, seqHMM, data.table)
 
 
 transitions <- matrix(
