@@ -8,7 +8,7 @@ library(pacman)
 library(tidyverse)
 library(magrittr)
 
-p_load(HMM, TraMineR, seqHMM, data.table, psych, progress, glue, scales)
+p_load(HMM, TraMineR, seqHMM, data.table, psych, progress, glue, scales, Hmisc)
 
 
 transitions <- matrix(
