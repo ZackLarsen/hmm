@@ -21,8 +21,8 @@ transitions <- matrix(
     0.009, 0.1698, 0.0514, 0.0036, 0.0177, 0.0728, 0.0102,
     0.0025, 0.0041, 0.2231, 0.0036, 0.0068, 0.0479, 0.0017
   ),
-  nrow=7, # number of rows
-  ncol=7, # number of columns
+  nrow=7, # from state
+  ncol=7, # to state
   byrow = TRUE
 ) %>%
   t()
@@ -40,15 +40,15 @@ emissions <- matrix(
     0,0,0.010446,0,0,
     0,0,0,0.506099,0
   ),
-  nrow=7, # number of rows
-  ncol=5, # number of columns
+  nrow=7, # number of observations
+  ncol=5, # number of states
   byrow = TRUE
 )
 
-emissions_labels <- c("Janet", "will", "back", "the", "bill")
+emissions_labels <- c("Janet", "will", "back", "the", "bill") # Observation row names
 
 
-Pi <- c(0.2767, 6e-04, 0.0031, 0.0453, 0.0449, 0.051, 0.2026)
+Pi <- c(0.2767, 6e-04, 0.0031, 0.0453, 0.0449, 0.051, 0.2026) # States
 
 
 # This function initialises a general discrete time and discrete space
