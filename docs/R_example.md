@@ -13,7 +13,7 @@ p_load(HMM, TraMineR, seqHMM, data.table, here, DataCombine,
 
 ```
 
-### Example from Jurafsky & Martin Speech & Language Processing book:
+### Example from Jurafsky & Martin [Speech & Language Processing](https://web.stanford.edu/~jurafsky/slp3/) book:
 
 ```r
 
