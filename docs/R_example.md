@@ -1,6 +1,6 @@
-## Here is an example of a hidden markov model in R for part-of-speech (POS) tagging:
+## HMM
 
-### Setting up dependencies with the easy-to-use p_load() function from the 'pacman' package:
+#### Here is an example of a hidden markov model in R for part-of-speech (POS) tagging from Jurafsky & Martin's [Speech & Language Processing](https://web.stanford.edu/~jurafsky/slp3/) book:
 
 ```r
 
@@ -11,11 +11,6 @@ library(magrittr)
 p_load(HMM, TraMineR, seqHMM, data.table, here, DataCombine,
        esquisse, ggthemr, hrbrthemes, reticulate, ggthemes)
 
-```
-
-### Example from Jurafsky & Martin [Speech & Language Processing](https://web.stanford.edu/~jurafsky/slp3/) book:
-
-```r
 
 transitions <- matrix(
   c(
