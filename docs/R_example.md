@@ -98,8 +98,8 @@ hmm$emissionProbs
 
 
 # Calculate Viterbi path
-viterbi <- viterbi(hmm, c('Janet', 'will', 'back', 'the', 'bill'))
-print(viterbi)
+viterbi_hidden_states <- viterbi(hmm, c('Janet', 'will', 'back', 'the', 'bill'))
+print(viterbi_hidden_states)
 
 # Expected output:
 c('NNP', 'MD', 'VB', 'DT', 'NN')
@@ -107,8 +107,8 @@ c('NNP', 'MD', 'VB', 'DT', 'NN')
 
 # Evaluate viterbi-predicted hidden state sequence against actual hidden states
 x <- data.frame(
-  viterbi_sequence = viterbi, 
-  actual_sequence = c('NNP', 'MD', 'VB', 'DT', 'NN')
+  viterbi_hidden_states = viterbi_hidden_states, 
+  actual_hidden_states = c('NNP', 'MD', 'VB', 'DT', 'NN')
 )
 
 # Calculate cohen's kappa statistic, which is an inter-rater agreement score between two sequences:
