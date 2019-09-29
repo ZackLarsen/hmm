@@ -118,6 +118,69 @@ simHMM(hmm, 4)
 
 #### Preprocessed WSJ sequence data looks like:
 
+```r
+
+> wsj_test_closed
+           token     tag
+    1:   <START> <START>
+    2:      most     JJS
+    3:   banking      NN
+    4:    issues     NNS
+    5:     <OOV>   <OOV>
+   ---                  
+69813:       san     NNP
+69814: francisco     NNP
+69815:   instead      RB
+69816:         .       .
+69817:     <EOS>   <EOS>
+> wsj_test_closed
+           token     tag
+    1:   <START> <START>
+    2:      most     JJS
+    3:   banking      NN
+    4:    issues     NNS
+    5:     <OOV>   <OOV>
+   ---                  
+69813:       san     NNP
+69814: francisco     NNP
+69815:   instead      RB
+69816:         .       .
+69817:     <EOS>   <EOS>
+> wsj_test_closed %>% 
++   head(50)
+         token     tag
+ 1:    <START> <START>
+ 2:       most     JJS
+ 3:    banking      NN
+ 4:     issues     NNS
+ 5:      <OOV>   <OOV>
+ 6:      after      IN
+ 7:          a      DT
+ 8:     sector      NN
+ 9:  downgrade      NN
+10:         by      IN
+11:      <OOV>   <OOV>
+12: securities     NNP
+13:          ,       ,
+14:   although      IN
+15:   national     NNP
+16:      <OOV>   <OOV>
+17:     showed     VBD
+18:   strength      NN
+19:         on      IN
+20:   positive      JJ
+21:   comments     NNS
+22:       from      IN
+23:  brokerage      NN
+24:      firms     NNS
+25:      about      IN
+26:        its    PRP$
+27:  long-term      JJ
+28:  prospects     NNS
+29:          .       .
+30:      <EOS>   <EOS>
+
+```
 
 
 ```r
