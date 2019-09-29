@@ -1,4 +1,4 @@
-## HMM
+## HMM R
 
 #### Here is an example of a hidden markov model in R for part-of-speech (POS) tagging from Jurafsky & Martin's [Speech & Language Processing](https://web.stanford.edu/~jurafsky/slp3/) book:
 
@@ -8,7 +8,7 @@ library(pacman)
 library(tidyverse)
 library(magrittr)
 
-p_load(HMM, TraMineR, seqHMM, data.table, psych)
+p_load(HMM, TraMineR, seqHMM, data.table, psych, progress, glue, scales)
 
 
 transitions <- matrix(
@@ -111,5 +111,185 @@ psych::cohen.kappa(x, w=NULL, n.obs=NULL, alpha=.05, levels=NULL)
 
 # Simulate from the HMM
 simHMM(hmm, 4)
+
+```
+
+#### Here is an example of POS tagging with hand-tagged data from Wall Street Journal articles:
+
+#### Preprocessed WSJ sequence data looks like:
+
+
+
+```r
+
+wsj_train <- fread('wsj_train.csv', col.names = c('token','tag'), header = FALSE, skip = 1)
+wsj_test <- fread('wsj_test.csv', col.names = c('token','tag'), header = FALSE, skip = 1)
+
+n_tokens <- wsj_train$token %>% n_distinct()
+
+# Handle OOV words:
+token_freq <- wsj_train %>%
+  group_by(token) %>%
+  tally() %>%
+  mutate(freq = n/sum(n)) %>%
+  arrange(-n)
+
+
+# Using proportion of tokens:
+vocab <- token_freq %>% head(round(0.9*n_tokens)) %>% select(token)
+vocab_size <- length(vocab$token)
+#vocab_size # 12,816
+
+oov_tokens <- token_freq %>% tail(n_tokens-round(0.9*n_tokens)) %>% select(token)
+#oov_tokens
+#length(oov_tokens$token) # 1,424
+
+# Replace rare observation tokens with out-of-vocabulary token:
+wsj_train_closed <- wsj_train
+wsj_train_closed[wsj_train_closed$token %in% oov_tokens$token] <- '<OOV>'
+
+# Do the same for test:
+wsj_test_closed <- wsj_test
+wsj_test_closed[!wsj_test_closed$token %in% vocab$token] <- '<OOV>'
+
+
+
+# First steps are to create transitions, emissions,
+# and starting/initial probability matrices:
+
+
+# Transitions probabilities (from one state to the next state):
+transitions <- wsj_train_closed %>%
+  select(tag) %>%
+  mutate(next_tag = lead(tag)) %>%
+  table()
+
+transitions_probs <- transitions / rowSums(transitions)
+rm(transitions) # Garbage collection - counts no longer needed
+
+
+# Emission probabilities (probability of state given observation):
+emissions <- wsj_train_closed %>%
+  select(token, tag) %>%
+  na.omit() %>%
+  table()
+
+emissions_probs <- emissions / rowSums(emissions)
+rm(emissions) # Garbage collection - counts no longer needed
+
+
+# Initial probabilities
+Pi <- transitions_probs['<START>',]
+
+
+# Do the probability matrices sum to 1 per column/row?
+#rowSums(emissions_probs) # all 1's
+#rowSums(transitions_probs) # all 1's
+#sum(Pi) # 1
+
+
+# Initialise HMM
+#initHMM(States, Symbols, startProbs=NULL, transProbs=NULL, emissionProbs=NULL)
+
+# These are our observations:
+Symbols <- row.names(emissions_probs)
+
+# These are our hidden states:
+States <- colnames(transitions_probs)
+
+# This is our parameterized hidden markov model:
+hmm <- initHMM(States, # Hidden States
+               Symbols, # Symbols, or observations
+               transProbs = transitions_probs,
+               emissionProbs = emissions_probs %>% t(),
+               startProbs = Pi)
+
+#print(hmm)
+hmm$States
+hmm$Symbols
+hmm$startProbs
+hmm$transProbs
+row.names(hmm$transProbs)
+hmm$emissionProbs
+row.names(hmm$emissionProbs)
+
+# Simulate from the HMM
+simHMM(hmm, 10)
+
+
+# Going through one sample sequence tagging procedure:
+
+# Sequence of observations
+observations <- wsj_test_closed[2:30,]$token
+actual_hidden_states <- wsj_test_closed[2:30,]$tag
+
+# Calculate Viterbi path
+viterbi_hidden_states <- viterbi(hmm, observations)
+print(viterbi_hidden_states)
+
+# Evaluate viterbi-predicted hidden state sequence against actual hidden states
+x <- data.frame(
+  viterbi_hidden_states = viterbi_hidden_states,
+  actual_hidden_states = actual_hidden_states
+)
+
+# Calculating cohen's kappa score for inter-rater agreement to assess performance of the model:
+kappa <- psych::cohen.kappa(x, w=NULL, n.obs=NULL, alpha=.05, levels=NULL) 
+
+kappa$kappa
+kappa$weighted.kappa
+
+
+
+# Going through multiple test set sequences:
+
+# First, split test set into sequences, removing the <START> and <END>
+# tokens/tags:
+
+test_sequences <- wsj_test_closed
+test_sequences$start <- ifelse(test_sequences$token == '<START>', 1, 0)
+test_sequences$seq_id <- cumsum(test_sequences$start)
+test_sequences %<>% 
+  filter(
+    token %nin% c('<START>', '<EOS>')
+  ) %>% 
+  select(-start)
+
+
+# With the prepared test sequences, loop through them and add the kappa scores to a list:
+
+options(show.error.messages = FALSE)
+k <- max(test_sequences$seq_id)
+kappas <- list(length = k)
+successes <- 0
+pb <- progress_bar$new(format = "[:bar] :current/:total (:percent)", total = k)
+for(i in 1:k){
+  pb$tick()
+  try(
+    {
+    sequences <- test_sequences %>% filter(seq_id == i)
+    actual_observations <- sequences$token
+    actual_hidden_states <-  sequences$tag
+    viterbi_hidden_states <- HMM::viterbi(hmm, actual_observations)
+    x <- data.frame(
+      viterbi_hidden_states = viterbi_hidden_states,
+      actual_hidden_states = actual_hidden_states
+    )
+    kappa <- psych::cohen.kappa(x, w=NULL, n.obs=NULL, alpha=.05, levels=NULL)
+    kappas[[i]] <- kappa$weighted.kappa
+    successes <- successes + 1
+    }
+    ,silent = TRUE
+  )
+}
+options(show.error.messages = TRUE)
+
+
+successes
+
+kappas
+avg_kappa <- mean(unlist(kappas))
+
+print(glue("Average kappa score for hidden markov model was: {percent(round(avg_kappa,4))}"))
 
 ```
