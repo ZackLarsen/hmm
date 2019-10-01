@@ -1,4 +1,4 @@
-### Hello! 
+### Python Examples
 
 Here we are taking the raw text files with the observation token and hidden state part-of-speech (POS) tags and adding in START and EOS markers to demarcate the boundaries between sentences (sequences). This way we do not consider bigrams such as "EOS,START", which would occur very frequently but not make sense in building our model:
 
