@@ -59,7 +59,7 @@ After running the python script above, we should be able to use pd.read_csv to r
 this, DT
 is, DT
 a, DT
-test NN
-sentence NN
+test, ADJ
+sentence, NN
 <EOS>, <EOS>
 
