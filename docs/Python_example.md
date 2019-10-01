@@ -55,11 +55,39 @@ test_df.to_csv(os.path.join(datadir, 'wsj_test.csv'), index=False)
 
 After running the python script above, we should be able to use pd.read_csv to read the train_df and test_df files, which look something like this:
 
-<START>, <START>
-this, DT
-is, DT
-a, DT
-test, ADJ
-sentence, NN
-<EOS>, <EOS>
+```r
+
+         token     tag
+ 1:    <START> <START>
+ 2:       most     JJS
+ 3:    banking      NN
+ 4:     issues     NNS
+ 5:      <OOV>   <OOV>
+ 6:      after      IN
+ 7:          a      DT
+ 8:     sector      NN
+ 9:  downgrade      NN
+10:         by      IN
+11:      <OOV>   <OOV>
+12: securities     NNP
+13:          ,       ,
+14:   although      IN
+15:   national     NNP
+16:      <OOV>   <OOV>
+17:     showed     VBD
+18:   strength      NN
+19:         on      IN
+20:   positive      JJ
+21:   comments     NNS
+22:       from      IN
+23:  brokerage      NN
+24:      firms     NNS
+25:      about      IN
+26:        its    PRP$
+27:  long-term      JJ
+28:  prospects     NNS
+29:          .       .
+30:      <EOS>   <EOS>
+
+```
 
