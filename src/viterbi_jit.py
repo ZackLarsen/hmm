@@ -111,13 +111,13 @@ if __name__ == '__main__':
     viterbi_pyjit(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
 
     print("Decoding test sequences...")
-    for mid in tqdm(test_mids[:50]):
+    for mid in tqdm(test_mids):
         test_sequence = [tup[1] for tup in test_sequences if tup[0]==mid]
         hidden_states = [tup[2] for tup in test_sequences if tup[0]==mid]
 
         #bestpathprob, viterbi_hidden_states = viterbi(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
-        #bestpathprob, viterbi_hidden_states = viterbi_pyjit(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
-        viterbi_pyjit(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
+        bestpathprob, viterbi_hidden_states = viterbi_pyjit(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
+        #viterbi_pyjit(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
 
         #kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states)
         #quadratic_kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states, weights='quadratic')
