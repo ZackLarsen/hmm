@@ -1,6 +1,6 @@
 ### Python Examples
 
-Here we are taking the raw text files with the observation token and hidden state part-of-speech (POS) tags and adding in START and EOS markers to demarcate the boundaries between sentences (sequences). This way we do not consider bigrams such as "EOS,START", which would occur very frequently but not make sense in building our model:
+Here we are taking the raw text files with the observation token and hidden state part-of-speech (POS) tags and adding in START and EOS markers to demarcate the boundaries between sentences (sequences). This way we do not consider bigrams such as "EOS ---> START", which would occur very frequently but not make sense in building our model:
 
 ```python
 
@@ -52,4 +52,14 @@ train_df.to_csv(os.path.join(datadir, 'wsj_train.csv'), index=False)
 test_df.to_csv(os.path.join(datadir, 'wsj_test.csv'), index=False)
 
 ```
+
+After running the python script above, we should be able to use pd.read_csv to read the train_df and test_df files, which look something like this:
+
+<START>, <START>
+this, DT
+is, DT
+a, DT
+test NN
+sentence NN
+<EOS>, <EOS>
 
