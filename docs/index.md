@@ -3,7 +3,7 @@
 This is a site about work I have done related to Hidden Markov Models (HMM) and part-of-speech tagging as well as some applications in healthcare, specifically electronic health record (EHR) data and high-cost claimant analysis.
 
 [Background](https://zacklarsen.github.io/hmm/Background.html)
-This covers some of the statistical background information for part-of-speech tagging applications of hidden markov models, as outlined in the excellent (and free!) speech & language processing book by Jurafsky and Martin.
+This covers some of the statistical background information for part-of-speech tagging applications of hidden markov models, as outlined in the excellent (and free!) [Speech & Language Processing](https://web.stanford.edu/~jurafsky/slp3/) book by Jurafsky and Martin.
 
 [Model workflow](https://zacklarsen.github.io/hmm/Model_workflow.html)
 This page covers from a high level the steps that need to be taken to go from data to working HMM.
