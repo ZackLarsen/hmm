@@ -11,7 +11,8 @@ library(magrittr)
 
 p_load(HMM, TraMineR, seqHMM, data.table, here, DataCombine,
        esquisse, ggthemr, hrbrthemes, reticulate, ggthemes,
-       Hmisc, conflicted, progress, glue, scales)
+       Hmisc, conflicted, progress, glue, scales, 
+       collapsibleTree, visNetwork, rpart, psych)
 
 conflicted::conflict_prefer("filter", "dplyr")
 conflicted::conflict_prefer("lag", "dplyr")
@@ -94,14 +95,12 @@ end_tags <- data.frame(token = "<EOS>", tag = "<EOS>", disregard = "<EOS>")
 end_tags
 
 
-
-
-
 wsj_train <- rbind(start_tags, wsj_train)
 wsj_train
 
 wsj_train <- rbind(wsj_train, end_tags)
 wsj_train
+
 
 
 wsj_train %>% 
@@ -394,6 +393,7 @@ wsj_test
 
 # Vocab size:
 V <- wsj_train$token %>% n_distinct()
+V
 
 
 word_freq <- wsj_train %>% 
@@ -476,7 +476,6 @@ wsj_test_closed %>%
 
 
 
-
 # Transitions:
 transitions <- wsj_train_closed %>% 
         select(tag) %>% 
@@ -494,8 +493,6 @@ rm(transitions)
 
 
 
-
-
 # Emission probabilities
 emissions <- wsj_train_closed %>%
         select(token, tag) %>%
@@ -507,9 +504,6 @@ emissions
 emissions_probs <- emissions / rowSums(emissions)
 emissions_probs
 rm(emissions)
-
-
-
 
 
 
@@ -536,13 +530,6 @@ sum(Pi)
 
 
 
-
-
-
-
-
-
-
 # Save matrix column and row names before using sapply for log10 function:
 row.names(emissions_probs)
 colnames(emissions_probs)
@@ -556,18 +543,15 @@ Symbol_names <- row.names(emissions_probs)
 
 
 
-
-
 # Convert all probabilitiy matrices to log10 to avoid numerical underflow:
-transitions_probs_log10 <- transitions_probs %>% 
-  sapply(function(x) log10(x))
-
-emissions_probs_log10 <- emissions_probs %>% 
-  sapply(function(x) log10(x))
-
-Pi_log10 <- Pi %>% 
-  sapply(function(x) log10(x))
-
+# transitions_probs_log10 <- transitions_probs %>% 
+#   sapply(function(x) log10(x))
+# 
+# emissions_probs_log10 <- emissions_probs %>% 
+#   sapply(function(x) log10(x))
+# 
+# Pi_log10 <- Pi %>% 
+#   sapply(function(x) log10(x))
 
 
 # Using purrr instead of sapply:
@@ -585,21 +569,14 @@ Pi_log10 <- modify(Pi, log10)
 hmm <- initHMM(State_names,
                Symbol_names, # Symbols
                transProbs = transitions_probs,
-               emissionProbs = emissions_probs,
+               emissionProbs = emissions_probs %>% t(),
                startProbs = Pi)
-
-# hmm <- initHMM(State_names,
-#                Symbol_names, # Symbols
-#                transProbs = transitions_probs_log10,
-#                emissionProbs = emissions_probs_log10,
-#                startProbs = Pi_log10)
 
 hmm$States
 hmm$Symbols
 hmm$startProbs
 hmm$transProbs
 hmm$emissionProbs
-
 
 
 transitions_probs['<START>', 'NN']
@@ -623,6 +600,10 @@ for(i in observations){
 'the' %in% vocab$token
 'pound' %in% vocab$token
 
+'confidence' %in% hmm$Symbols
+'in' %in% hmm$Symbols
+'the' %in% hmm$Symbols
+'pound' %in% hmm$Symbols
 
 
 
@@ -632,9 +613,308 @@ for(i in observations){
 viterbi <- viterbi(hmm, observations)
 print(viterbi)
 
-
 # Simulate from the HMM
 simHMM(hmm, 100)
+
+
+
+
+
+
+
+
+# Using the log10 hmm:
+log10_hmm <- initHMM(State_names,
+               Symbol_names, # Symbols
+               transProbs = transitions_probs_log10,
+               emissionProbs = emissions_probs_log10 %>% t(),
+               startProbs = Pi_log10)
+
+log10_hmm$States
+log10_hmm$Symbols
+log10_hmm$startProbs
+log10_hmm$transProbs
+log10_hmm$emissionProbs
+
+viterbi <- viterbi(log10_hmm, observations)
+print(viterbi)
+simHMM(log10_hmm, 100)
+
+
+
+
+# HMM Test Predictions ----------------------------------------------------
+
+
+# Going through one sample sequence tagging procedure:
+
+# Sequence of observations
+#observations <- c("<START>","confidence","in","the","<OOV>")
+observations <- wsj_test_closed[2:29,]$token
+observations
+
+actual_hidden_states <- wsj_test_closed[2:29,]$tag
+actual_hidden_states
+
+
+
+# Make sure observations are in the vocabulary:
+for(i in observations){
+  if(!i %in% vocab$token){
+    print(glue(i," is out of vocabulary"))
+  }
+}
+
+'warburg' %in% vocab$token
+'retreated' %in% vocab$token
+'<OOV>' %in% vocab$token
+
+'warburg' %in% hmm$Symbols
+'retreated' %in% hmm$Symbols
+'<OOV>' %in% hmm$Symbols
+
+
+
+# Change out-of-vocab tokens to '<OOV>':
+oov_observations <- list(length = length(observations))
+for(i in seq_along(observations)){
+  if(observations[i] %nin% hmm$Symbols){
+    print(observations[i])
+    oov_observations[i] <- '<OOV>'
+  }else{
+    oov_observations[i] <- observations[i]
+  }
+}
+
+oov_observations
+
+unlist(oov_observations)
+
+
+
+
+# Calculate Viterbi path
+viterbi_hidden_states <- viterbi(hmm, unlist(oov_observations))
+print(viterbi_hidden_states)
+
+# Evaluate viterbi-predicted hidden state sequence against actual hidden states
+x <- data.frame(
+  viterbi_hidden_states = viterbi_hidden_states,
+  actual_hidden_states = actual_hidden_states
+)
+
+kappa <- psych::cohen.kappa(x, w=NULL, n.obs=NULL, alpha=.05, levels=NULL) 
+
+kappa$kappa
+
+kappa$weighted.kappa
+
+
+
+
+
+
+
+# Going through all test set sequences:
+
+# First, split test set into sequences, removing the <START> and <END>
+# tokens/tags:
+
+wsj_test_closed
+
+test_sequences <- wsj_test_closed
+test_sequences$start <- ifelse(test_sequences$token == '<START>', 1, 0)
+test_sequences$seq_id <- cumsum(test_sequences$start)
+test_sequences %<>% 
+  filter(
+    token %nin% c('<START>', '<EOS>')
+  ) %>% 
+  select(-start)
+
+# test_sequences %>%
+#   filter(seq_id <= 10) %>% 
+#   View()
+
+
+max(test_sequences$seq_id)
+
+test_sequences %>% filter(seq_id == max(test_sequences$seq_id))
+
+test_sequences %>% filter(seq_id == 86)
+
+
+
+
+
+
+test_sequences %>% 
+  filter(token %nin% hmm$Symbols)
+
+
+test_sequences %<>% 
+  mutate(token = ifelse(token %nin% hmm$Symbols, '<OOV>', token))
+
+
+
+
+
+
+#options(show.error.messages = FALSE)
+k <- 1000
+#k <- max(test_sequences$seq_id)
+viterbi_hidden_states_list <- list(length = k)
+kappas <- list(length = k)
+successes <- 0
+#pb <- progress_bar$new(total = k)
+pb <- progress_bar$new(format = "[:bar] :current/:total (:percent)", total = k)
+for(i in 1:k){
+  pb$tick()
+  try(
+    {
+      sequences <- test_sequences %>% filter(seq_id == i)
+      actual_observations <- sequences$token
+      actual_hidden_states <-  sequences$tag
+      viterbi_hidden_states <- HMM::viterbi(hmm, actual_observations)
+      viterbi_hidden_states_list[[i]] <- viterbi_hidden_states
+      x <- data.frame(
+        viterbi_hidden_states = viterbi_hidden_states,
+        actual_hidden_states = actual_hidden_states
+      )
+      kappa <- psych::cohen.kappa(x, w=NULL, n.obs=NULL, alpha=.05, levels=NULL)
+      kappas[[i]] <- kappa$weighted.kappa
+      #print(kappa$weighted.kappa)
+      successes <- successes + 1
+    }
+    ,silent = TRUE
+  )
+}
+#options(show.error.messages = TRUE)
+
+
+successes
+
+# Compare actual hidden states to the model's predictions:
+viterbi_hidden_states_list[[1]]
+test_sequences %>% 
+  filter(seq_id == 1) %>% 
+  select(tag)
+
+
+
+kappas
+unlist(kappas)
+
+kappas[1:k]
+
+mean(unlist(kappas[1:k]))
+
+avg_kappa <- mean(unlist(kappas[1:k]))
+avg_kappa
+
+print(glue("Average kappa score for hidden markov model was: {percent(round(avg_kappa,4))}"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# HMM Baum-Welch ----------------------------------------------------------
+
+# For an initial Hidden Markov Model (HMM) and a given sequence
+# of observations, the Baum-Welch algorithm infers optimal
+# parameters to the HMM. Since the Baum-Welch algorithm is a 
+# variant ofthe Expectation-Maximisation algorithm, the
+# algorithm converges to a local solution which might not 
+# be the global optimum.
+
+# Initialize the hmm before running Baum-Welch. In this case,
+# we will use just a subset of the training data to get a 
+# rough initialization and see how it compares to the
+# more complete version of the supervised training hmm:
+
+
+bw_df <- wsj_train_closed %>% head(1000)
+
+# Transitions:
+transitions <- bw_df %>% 
+  select(tag) %>% 
+  mutate(next_tag = lead(tag)) %>% 
+  table()
+
+transitions
+
+transitions_probs <- transitions / rowSums(transitions)
+transitions_probs
+
+rm(transitions)
+
+
+
+
+# Emission probabilities
+emissions <- bw_df %>%
+  select(token, tag) %>%
+  na.omit() %>%
+  table()
+
+emissions
+
+emissions_probs <- emissions / rowSums(emissions)
+emissions_probs
+rm(emissions)
+
+
+
+
+# Initial probabilities
+sum(transitions_probs['<START>',])
+Pi <- transitions_probs['<START>',]
+Pi
+sum(Pi)
+
+
+
+
+
+State_names <- colnames(transitions_probs)
+Symbol_names <- row.names(emissions_probs)
+
+bw_hmm <- initHMM(State_names,
+                  Symbol_names, # Symbols
+                  transProbs = transitions_probs,
+                  emissionProbs = emissions_probs %>% t(),
+                  startProbs = Pi)
+
+
+
+
+wsj_train_closed$token %>% tail(100)
+
+# Sequence of observations
+observations <- wsj_train_closed$token %>% tail(100)
+
+# Baum-Welch
+bw = baumWelch(bw_hmm, observations, 10)
+print(bw$hmm)
+
+
+
+
+
+
+
+
 
 
 
@@ -876,6 +1156,7 @@ hmm <- initHMM(States, # Hidden States
                Symbols, # Symbols, or observations
                transProbs = transitions_probs,
                emissionProbs = emissions_probs %>% t(),
+               #emissionProbs = emissions_probs,
                startProbs = Pi)
 
 
@@ -898,10 +1179,10 @@ simHMM(hmm, 100)
 
 # Sequence of observations
 #observations <- c("<START>","confidence","in","the","<OOV>")
-observations <- wsj_test_closed[2:30,]$token
+observations <- wsj_test_closed[2:29,]$token
 observations
 
-actual_hidden_states <- wsj_test_closed[2:30,]$tag
+actual_hidden_states <- wsj_test_closed[2:29,]$tag
 actual_hidden_states
 
 # Calculate Viterbi path

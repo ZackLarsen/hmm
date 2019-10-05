@@ -69,12 +69,27 @@ import pickle
 #sys.path.append('C:\\Users\\U383387\\Zack_master\\ProgramEvaluations\\Team Projects\\HCC\\src')
 
 # Mac OS X:
-data_dir = '/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data'
 homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
+data_dir = os.path.join(homedir, 'data/')
 sys.path.append(os.path.join(homedir, 'src/'))
 
 from hmm import *
 #importlib.reload(hmm)
+
+
+
+
+
+# Read in from csv files:
+train_df = pd.read_csv(os.path.join(datadir, 'wsj_train.csv'))
+test_df = pd.read_csv(os.path.join(datadir, 'wsj_test.csv'))
+
+
+
+
+
+
+
 
 
 
