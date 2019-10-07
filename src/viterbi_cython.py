@@ -13,7 +13,19 @@ import sys
 from sklearn.metrics import cohen_kappa_score
 from tqdm import tqdm
 
-data_dir = '/Users/zacklarsen/Zack_master/Projects/Work Projects/hmm/data'
+# Import the cython function we need for speedup
+import pyximport
+pyximport.install()
+from viterbi import cython_viterbi
+import viterbi
+viterbi.cython_viterbi?
+
+
+
+
+
+
+data_dir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm/data'
 homedir = '/Users/zacklarsen/Zack_Master/Projects/Work Projects/hmm'
 sys.path.append(os.path.join(homedir, 'src/'))
 from hmm import *
@@ -42,20 +54,21 @@ Pi_log = log_matrices['Pi']
 
 
 
-if __name__ == '__main__':
-    test_tuple = namedtuple('test_tuple', 'seq_id kappa quad_kappa')
-    results = []
 
-    print("Decoding test sequences ----->")
-    #for mid in tqdm(test_mids[:10]):
-    for mid in tqdm(test_mids):
-        test_sequence = [tup[1] for tup in test_sequences if tup[0]==mid]
-        hidden_states = [tup[2] for tup in test_sequences if tup[0]==mid]
 
-        bestpathprob, viterbi_hidden_states = viterbi(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
-        kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states)
-        quadratic_kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states, weights='quadratic')
-        results.append(test_tuple(mid, kappa_score, quadratic_kappa_score))
+
+
+test_tuple = namedtuple('test_tuple', 'seq_id kappa quad_kappa')
+results = []
+
+for mid in tqdm(test_mids):
+    test_sequence = [tup[1] for tup in test_sequences if tup[0] == mid]
+    hidden_states = [tup[2] for tup in test_sequences if tup[0] == mid]
+
+    bestpathprob, viterbi_hidden_states = cython_viterbi(test_sequence, transitions_matrix_log, emissions_matrix_log, Pi_log)
+    kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states)
+    quadratic_kappa_score = cohen_kappa_score(hidden_states, viterbi_hidden_states, weights='quadratic')
+    results.append(test_tuple(mid, kappa_score, quadratic_kappa_score))
 
     print("Results being saved to", os.path.join(data_dir, 'results.pickle'))
     with open(os.path.join(data_dir, 'results.pickle'), 'wb') as f:
